@@ -64,7 +64,7 @@ app.get('/api/login', function (req, res) {
     res.cookie(stateKey, state);
 
     // your application requests authorization
-    var scope = "user-read-email user-read-private playlist-modify-private playlist-modify-public";
+    var scope = "user-read-email user-read-private playlist-read-private playlist-modify-private playlist-modify-public";
     console.log("scopes: ", scope);
 
     res.redirect('https://accounts.spotify.com/authorize?' +
@@ -119,7 +119,7 @@ app.get('/api/spotify/playlists', function (req, res) {
 
     const playList = new PlayList(spotifyApi);
 
-    playList.getPlayLists()
+    playList.getOwnedPlayLists()
         .then(function (data) {
             // go through the play list and extract what we want
             const list = [];
@@ -132,7 +132,7 @@ app.get('/api/spotify/playlists', function (req, res) {
                 list.push({
                     id: item.id,
                     name: item.name,
-                    img: item.images[0].url,
+                    img: (item.images.length >0) ? item.images[0].url : "",
                     total: item.tracks.total
                 })
             }

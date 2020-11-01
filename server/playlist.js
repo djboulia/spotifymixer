@@ -1,17 +1,32 @@
 
 var PlayList = function (spotifyApi) {
 
-    this.getPlayLists = function () {
+    this.getOwnedPlayLists = function () {
       return new Promise(function (resolve, reject) {
         // Get the authenticated user
         spotifyApi.getMe()
           .then(function (data) {
-            console.log('Some information about the authenticated user', data.body);
+            const me = data.body;
+            console.log('Some information about the authenticated user', me);
   
             // Get a user's playlists
-            spotifyApi.getUserPlaylists(data.body.id)
+            spotifyApi.getUserPlaylists({limit: 50})
               .then(function (data) {
                 console.log('Retrieved playlists', data.body);
+
+                const ownedItems = [];
+                const allItems = data.body.items;
+
+                for (let i=0; i<allItems.length; i++) {
+                  const item = allItems[i];
+                  if (item.owner.id === me.id) {
+                    ownedItems.push(item);
+                  } else {
+                    console.log("skipping unowned playlist ", item.name)
+                  }
+                }
+
+                data.body.items = ownedItems;
   
                 resolve(data.body);
               }, function (err) {
