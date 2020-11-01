@@ -17,7 +17,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { mainListItems } from './listItems';
-import Playlists from './Playlists';
+import PropTypes from 'prop-types';
 
 function Copyright() {
   return (
@@ -113,7 +113,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Dashboard() {
+export default function Dashboard(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -164,7 +164,7 @@ export default function Dashboard() {
             {/* Play lists */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Playlists />
+                {props.children}
               </Paper>
             </Grid>
           </Grid>
@@ -176,3 +176,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+Dashboard.propTypes = {
+  children: PropTypes.node,
+};

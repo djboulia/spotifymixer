@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import {Redirect} from 'react-router-dom'
+import Dashboard from './Dashboard';
+import Title from './Title';
 import SpotifyApi from './SpotifyApi';
 
 let statusMsg = (msg) => {
@@ -43,11 +45,11 @@ class Login extends Component {
     const link = SpotifyApi.getLoginUrl();
 
     return (
-      <div>
-      <h1>Login</h1>
+      <Dashboard>
+      <Title>Login</Title>
 
       <p>Please <a href={link}>login to Spotify</a></p>
-    </div>
+    </Dashboard>
     )
   }
 }

@@ -6,7 +6,7 @@ import {
   Redirect,
 } from "react-router-dom";
 
-import Dashboard from './Dashboard';
+import Playlists from './Playlists';
 import Login from './Login';
 import PostLogin from './PostLogin';
 import Logout from './Logout';
@@ -42,7 +42,7 @@ export default function App() {
             <Route exact path="/login" component={Login} />
             <Route exact path="/postLogin" component={PostLogin} />
             <PrivateRoute exact path="/logout" component={Logout} />
-            <PrivateRoute exact path="/main" component={Dashboard} />
+            <PrivateRoute exact path="/main" component={Playlists} />
             <Route exact path="/" component={Login} />
           </Switch>
       </Router>

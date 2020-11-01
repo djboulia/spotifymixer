@@ -9,6 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import Title from './Title';
 import { LinearProgress } from '@material-ui/core';
+import Dashboard from './Dashboard';
 import SpotifyApi from './SpotifyApi';
 
 // Generate Playlist Data
@@ -61,7 +62,7 @@ export default function Playlists() {
     
     } catch (error) {
       console.log("error checking progress!");
-      setErrMsg("error checking progress!");
+      setErrMsg("Error communicating with server!");
     }
   };
 
@@ -106,7 +107,7 @@ export default function Playlists() {
         }
       } catch (error) {
         console.log("error loading user data");
-        setErrMsg("Error loading user data");
+        setErrMsg("Error loading user data!");
       }
     };
  
@@ -130,7 +131,7 @@ export default function Playlists() {
   );
 
   return (  
-      <React.Fragment>
+      <Dashboard>
         {inProgress && progressIndicator}
 
         <Title>Playlists for {name}</Title>
@@ -155,6 +156,6 @@ export default function Playlists() {
               ))}
             </TableBody>
           </Table>
-        </React.Fragment>  
+        </Dashboard>  
   );
 }
