@@ -1,0 +1,36 @@
+{
+  "name": "create-react-app",
+  "version": "4.0.0",
+  "private": true,
+  "proxy": "http://localhost:8888",
+  "scripts": {
+    "start": "API_URL=http://localhost:3001/api/ react-scripts start",
+    "build": "react-scripts build && cp -r build/* ../client/",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@material-ui/core": "latest",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
+    "axios": "^0.21.0",
+    "clsx": "latest",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "latest",
+    "typescript": "^4.0.5"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 safari version",
+      "last 1 chrome version",
+      "last 1 firefox version"
+    ]
+  }
+}
