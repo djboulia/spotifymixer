@@ -8,6 +8,7 @@
  */
 
 var express = require('express'); // Express web server framework
+var cors = require('cors')
 var path = require('path');
 var request = require('request'); // "Request" library
 var session = require("express-session");
@@ -51,6 +52,8 @@ var stateKey = 'spotify_auth_state';
 let shuffleProgress = new ShuffleProgress();
 
 var app = express();
+
+app.use(cors())
 
 app.use(express.static(path.join(__dirname, '..', 'client')))
     .use(cookieParser());
@@ -251,17 +254,6 @@ app.get('/api/auth/spotify/callback', function (req, res) {
                 var access_token = body.access_token,
                     refresh_token = body.refresh_token;
 
-                // var options = {
-                //     url: 'https://api.spotify.com/v1/me',
-                //     headers: {
-                //         'Authorization': 'Bearer ' + access_token
-                //     },
-                //     json: true
-                // };
-                // // use the access token to access the Spotify Web API
-                // request.get(options, function (error, response, body) {
-                //     console.log(body);
-                // });
                 req.session.access_token = access_token;
                 req.session.refresh_token = refresh_token;
                 req.session.timestamp = Date.now();

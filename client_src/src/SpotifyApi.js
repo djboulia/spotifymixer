@@ -1,25 +1,30 @@
 import axios from 'axios';
+/**
+ * Wrapper for back end server calls to Spotify functions
+ * The back end server then handles the actual Spotify interaction, 
+ * returning the results to the client for display
+ */
 
 
-  /**
-   * if REACT_APP_API_URL is set, we send back end requests to that, otherwise
-   * we default to the same host that served up the client
-   * useful for dev mode where the server might be hosted on a different url
-   */
-  const baseUrl = function() {
+/**
+ * if REACT_APP_API_URL is set, we send back end requests to that, otherwise
+ * we default to the same host that served up the client
+ * useful for dev mode where the server might be hosted on a different url
+ */
+const baseUrl = function () {
     console.log("baseUrl: " + process.env.REACT_APP_API_URL);
 
     return (process.env.REACT_APP_API_URL) ? process.env.REACT_APP_API_URL : "";
-  }
+}
 
 const loginState = {
-    storageKey : "login",
+    storageKey: "login",
 
-    set : function (val) {
+    set: function (val) {
         localStorage.setItem(this.storageKey, JSON.stringify(val));
     },
 
-    get : function () {
+    get: function () {
         const str = localStorage.getItem(this.storageKey);
         return JSON.parse(str);
     }
@@ -33,7 +38,7 @@ const SpotifyApi = {
     },
 
     getLoginUrl() {
-       return baseUrl() + "/api/login";
+        return baseUrl() + "/api/login";
     },
 
     authenticated() {
@@ -53,7 +58,7 @@ const SpotifyApi = {
         })
     },
 
-     logout() {
+    logout() {
         console.log("logout");
         loginState.set(false);
     },
