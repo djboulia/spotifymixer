@@ -1,5 +1,17 @@
 import axios from 'axios';
 
+
+  /**
+   * if REACT_APP_API_URL is set, we send back end requests to that, otherwise
+   * we default to the same host that served up the client
+   * useful for dev mode where the server might be hosted on a different url
+   */
+  const baseUrl = function() {
+    console.log("baseUrl: " + process.env.REACT_APP_API_URL);
+
+    return (process.env.REACT_APP_API_URL) ? process.env.REACT_APP_API_URL : "";
+  }
+
 const loginState = {
     storageKey : "login",
 
@@ -21,7 +33,7 @@ const SpotifyApi = {
     },
 
     getLoginUrl() {
-       return "http://localhost:8888/api/login";
+       return baseUrl() + "/api/login";
     },
 
     authenticated() {

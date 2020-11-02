@@ -8,6 +8,7 @@
  */
 
 var express = require('express'); // Express web server framework
+var path = require('path');
 var request = require('request'); // "Request" library
 var session = require("express-session");
 var querystring = require('querystring');
@@ -22,9 +23,13 @@ require("dotenv").config();
 
 var client_id = process.env.CLIENT_ID; // Your client id
 var client_secret = process.env.CLIENT_SECRET; // Your secret
-var client_url = 'http://localhost:3000';
-var server_url = 'http://localhost:8888';
-var redirect_uri = server_url + '/api/auth/spotify/callback'; // Or Your redirect uri
+var client_url = (process.env.CLIENT_URL) ? process.env.CLIENT_URL : ""; // 'http://localhost:3000';
+var server_url = (process.env.SERVER_URL) ? process.env.SERVER_URL : ""; // 'http://localhost:8888';
+var redirect_uri = server_url + '/api/auth/spotify/callback';
+
+console.log("server_url ", server_url);
+console.log("client_url ", client_url);
+console.log("redirect_uri ", redirect_uri);
 
 /**
  * Generates a random string containing numbers and letters
@@ -47,7 +52,7 @@ let shuffleProgress = new ShuffleProgress();
 
 var app = express();
 
-app.use(express.static(__dirname + '/../client'))
+app.use(express.static(path.join(__dirname, '..', 'client')))
     .use(cookieParser());
 
 app.use(
@@ -132,7 +137,7 @@ app.get('/api/spotify/playlists', function (req, res) {
                 list.push({
                     id: item.id,
                     name: item.name,
-                    img: (item.images.length >0) ? item.images[0].url : "",
+                    img: (item.images.length > 0) ? item.images[0].url : "",
                     total: item.tracks.total
                 })
             }
@@ -156,7 +161,7 @@ app.get('/api/spotify/progress', function (req, res) {
  * @param {Number} shuffled tracks shuffled so far
  * @param {Number} total total number of tracks
  */
-var updateShuffleProgress = function(shuffled, total) {
+var updateShuffleProgress = function (shuffled, total) {
     console.log("updateShuffleProgress " + shuffled);
     shuffleProgress.setShuffled(shuffled);
 }
@@ -283,5 +288,11 @@ app.get('/api/auth/spotify/callback', function (req, res) {
     }
 });
 
+// catch all other non-API calls and redirect back to our REACT app
+app.get('/*', function (req, res) {
+    const defaultFile = path.join(__dirname, '..', 'client', 'index.html');
+    res.sendFile(defaultFile);
+});
+
 console.log('Listening on 8888');
-app.listen(8888);
+app.listen(process.env.PORT || 8888);

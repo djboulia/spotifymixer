@@ -4,7 +4,7 @@
   "private": true,
   "proxy": "http://localhost:8888",
   "scripts": {
-    "start": "API_URL=http://localhost:3001/api/ react-scripts start",
+    "start": "REACT_APP_API_URL=http://localhost:8888 react-scripts start",
     "build": "react-scripts build && cp -r build/* ../client/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
