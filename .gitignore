@@ -8,7 +8,8 @@
 # testing
 /coverage
 
-# production
+# production client files are built, not tracked
+/client
 /build
 
 # IDEs and editors
