@@ -19,6 +19,7 @@ var PlayList = require('./playlist');
 var Mixer = require('./mixer');
 var TrackUtils = require('./trackutils');
 var ShuffleProgress = require('./shuffleprogress');
+const { access } = require('fs');
 
 require("dotenv").config();
 
@@ -45,6 +46,50 @@ var generateRandomString = function (length) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;
+};
+
+var sessionExpired = function(session) {
+    // if the session is going to expire in 5 minutes or less,
+    // refresh the token
+    const expires_at = session.expires_at - (5*60*1000);
+
+    console.log("expires_at " + expires_at + " now " + Date.now());
+    return (Date.now() >= expires_at);
+};
+
+async function refreshToken(session, spotifyApi) {
+    const data = await spotifyApi.refreshAccessToken();
+    console.log("refreshAccessToken: ", data.body);
+
+    const access_token = data.body['access_token'];
+    const expires_in = data.body['expires_in'];
+
+    spotifyApi.setAccessToken(access_token);
+
+    // update our session state with new info
+    session.access_token = access_token;
+    session.expires_in = expires_in;
+    session.expires_at = Date.now() + (expires_in * 1000);
+
+    return spotifyApi;
+}
+
+var getSpotifyApi = function (session) {
+    const spotifyApi = new SpotifyWebApi({
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token,
+        redirectUri: redirect_uri,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET
+    });
+
+    if (sessionExpired(session)) {
+        // go get a refreshed token
+        console.log("session expired, refreshing token");
+        refreshToken(session, spotifyApi);
+    }
+
+    return spotifyApi;
 };
 
 var stateKey = 'spotify_auth_state';
@@ -96,13 +141,7 @@ app.get('/api/authenticated', function (req, res) {
 });
 
 app.get('/api/spotify/me', function (req, res) {
-    const spotifyApi = new SpotifyWebApi({
-        accessToken: req.session.access_token,
-        refreshToken: req.session.refresh_token,
-        redirectUri: redirect_uri,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET
-    });
+    const spotifyApi = getSpotifyApi(req.session);
 
     spotifyApi.getMe()
         .then(function (data) {
@@ -117,14 +156,7 @@ app.get('/api/spotify/me', function (req, res) {
 });
 
 app.get('/api/spotify/playlists', function (req, res) {
-    const spotifyApi = new SpotifyWebApi({
-        accessToken: req.session.access_token,
-        refreshToken: req.session.refresh_token,
-        redirectUri: redirect_uri,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET
-    });
-
+    const spotifyApi = getSpotifyApi(req.session);
     const playList = new PlayList(spotifyApi);
 
     playList.getOwnedPlayLists()
@@ -172,16 +204,9 @@ var updateShuffleProgress = function (shuffled, total) {
 app.get('/api/spotify/shuffle', function (req, res) {
     const playListId = req.query.playListId || null;
 
-    const spotifyApi = new SpotifyWebApi({
-        accessToken: req.session.access_token,
-        refreshToken: req.session.refresh_token,
-        redirectUri: redirect_uri,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET
-    });
-
     shuffleProgress.start();
 
+    const spotifyApi = getSpotifyApi(req.session);
     const mixer = new Mixer(spotifyApi);
 
     mixer.catalogTracks(playListId)
@@ -252,19 +277,17 @@ app.get('/api/auth/spotify/callback', function (req, res) {
             if (!error && response.statusCode === 200) {
 
                 var access_token = body.access_token,
-                    refresh_token = body.refresh_token;
+                    refresh_token = body.refresh_token,
+                    expires_in = body.expires_in;
+
+                console.log("got access token, expires in " + expires_in + " seconds");
 
                 req.session.access_token = access_token;
                 req.session.refresh_token = refresh_token;
-                req.session.timestamp = Date.now();
+                req.session.expires_in = expires_in;
+                req.session.expires_at = Date.now() + (expires_in * 1000);
 
-                const spotifyApi = new SpotifyWebApi({
-                    accessToken: req.session.access_token,
-                    refreshToken: req.session.refresh_token,
-                    redirectUri: redirect_uri,
-                    clientId: process.env.CLIENT_ID,
-                    clientSecret: process.env.CLIENT_SECRET
-                });
+                const spotifyApi = getSpotifyApi(req.session);
 
                 spotifyApi.getMe()
                     .then(function (data) {
