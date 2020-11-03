@@ -19,7 +19,9 @@ var PlayList = require('./playlist');
 var Mixer = require('./mixer');
 var TrackUtils = require('./trackutils');
 var ShuffleProgress = require('./shuffleprogress');
-const { access } = require('fs');
+const {
+    access
+} = require('fs');
 
 require("dotenv").config();
 
@@ -48,10 +50,10 @@ var generateRandomString = function (length) {
     return text;
 };
 
-var sessionExpired = function(session) {
+var sessionExpired = function (session) {
     // if the session is going to expire in 5 minutes or less,
     // refresh the token
-    const expires_at = session.expires_at - (5*60*1000);
+    const expires_at = session.expires_at - (5 * 60 * 1000);
 
     console.log("expires_at " + expires_at + " now " + Date.now());
     return (Date.now() >= expires_at);
@@ -74,7 +76,7 @@ async function refreshToken(session, spotifyApi) {
     return spotifyApi;
 }
 
-var getSpotifyApi = function (session) {
+async function getSpotifyApi(session) {
     const spotifyApi = new SpotifyWebApi({
         accessToken: session.access_token,
         refreshToken: session.refresh_token,
@@ -86,9 +88,10 @@ var getSpotifyApi = function (session) {
     if (sessionExpired(session)) {
         // go get a refreshed token
         console.log("session expired, refreshing token");
-        refreshToken(session, spotifyApi);
+        await refreshToken(session, spotifyApi);
     }
 
+    console.log("returning with access token ", spotifyApi.getAccessToken())
     return spotifyApi;
 };
 
@@ -141,9 +144,10 @@ app.get('/api/authenticated', function (req, res) {
 });
 
 app.get('/api/spotify/me', function (req, res) {
-    const spotifyApi = getSpotifyApi(req.session);
-
-    spotifyApi.getMe()
+    getSpotifyApi(req.session)
+        .then(function (spotifyApi) {
+            return spotifyApi.getMe();
+        })
         .then(function (data) {
             console.log(data.body);
             res.setHeader('Content-Type', 'application/json');
@@ -156,10 +160,12 @@ app.get('/api/spotify/me', function (req, res) {
 });
 
 app.get('/api/spotify/playlists', function (req, res) {
-    const spotifyApi = getSpotifyApi(req.session);
-    const playList = new PlayList(spotifyApi);
+    getSpotifyApi(req.session)
+        .then(function (spotifyApi) {
+            const playList = new PlayList(spotifyApi);
 
-    playList.getOwnedPlayLists()
+            return playList.getOwnedPlayLists()
+        })
         .then(function (data) {
             // go through the play list and extract what we want
             const list = [];
@@ -206,35 +212,40 @@ app.get('/api/spotify/shuffle', function (req, res) {
 
     shuffleProgress.start();
 
-    const spotifyApi = getSpotifyApi(req.session);
-    const mixer = new Mixer(spotifyApi);
+    getSpotifyApi(req.session)
+        .then(function (spotifyApi) {
+            const mixer = new Mixer(spotifyApi);
 
-    mixer.catalogTracks(playListId)
-        .then(function (result) {
+            mixer.catalogTracks(playListId)
+                .then(function (result) {
 
-            shuffleProgress.setTotal(result.before.length);
+                    shuffleProgress.setTotal(result.before.length);
 
-            mixer.reorderTracks(playListId, result.before, result.after, updateShuffleProgress)
-                .then(function (result2) {
-                    // go back and look at this playlist to verify it's in the right order
-                    const playList = new PlayList(spotifyApi);
-                    playList.getTracks(playListId)
-                        .then(function (tracks) {
-                                if (TrackUtils.identicalTrackLists(result.after, tracks)) {
-                                    console.log("Track lists match!");
-                                    shuffleProgress.complete();
-                                } else {
-                                    shuffleProgress.complete();
-                                }
-                            },
-                            function (err) {
-                                console.log("Error: ", err);
-                                shuffleProgress.complete();
-                            })
+                    mixer.reorderTracks(playListId, result.before, result.after, updateShuffleProgress)
+                        .then(function (result2) {
+                            // go back and look at this playlist to verify it's in the right order
+                            const playList = new PlayList(spotifyApi);
+                            playList.getTracks(playListId)
+                                .then(function (tracks) {
+                                        if (TrackUtils.identicalTrackLists(result.after, tracks)) {
+                                            console.log("Track lists match!");
+                                            shuffleProgress.complete();
+                                        } else {
+                                            shuffleProgress.complete();
+                                        }
+                                    },
+                                    function (err) {
+                                        console.log("Error: ", err);
+                                        shuffleProgress.complete();
+                                    })
+                        }, function (err) {
+                            console.log("Error: ", err);
+                            shuffleProgress.complete();
+                        })
                 }, function (err) {
                     console.log("Error: ", err);
                     shuffleProgress.complete();
-                })
+                });
         }, function (err) {
             console.log("Error: ", err);
             shuffleProgress.complete();
@@ -287,9 +298,10 @@ app.get('/api/auth/spotify/callback', function (req, res) {
                 req.session.expires_in = expires_in;
                 req.session.expires_at = Date.now() + (expires_in * 1000);
 
-                const spotifyApi = getSpotifyApi(req.session);
-
-                spotifyApi.getMe()
+                getSpotifyApi(req.session)
+                    .then(function(spotifyApi) {
+                        return spotifyApi.getMe();
+                    })
                     .then(function (data) {
                         console.log(data.body);
                     });
