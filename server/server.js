@@ -149,7 +149,7 @@ app.get('/api/spotify/me', function (req, res) {
             return spotifyApi.getMe();
         })
         .then(function (data) {
-            console.log(data.body);
+            console.log("Found user " + data.body.display_name);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(data.body));
         }, function (err) {
@@ -168,12 +168,14 @@ app.get('/api/spotify/playlists', function (req, res) {
         })
         .then(function (data) {
             // go through the play list and extract what we want
+            console.log("playlists: ");
             const list = [];
             for (let i = 0; i < data.items.length; i++) {
                 const item = data.items[i];
 
-                console.log("tracks: ", item.tracks);
-                console.log("images: ", item.images);
+                // console.log("tracks: ", item.tracks);
+                // console.log("images: ", item.images);
+                console.log(item.name);
 
                 list.push({
                     id: item.id,
@@ -181,8 +183,8 @@ app.get('/api/spotify/playlists', function (req, res) {
                     img: (item.images.length > 0) ? item.images[0].url : "",
                     total: item.tracks.total
                 })
+
             }
-            console.log("items: ", list);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify(list));
         }, function (err) {
@@ -303,7 +305,7 @@ app.get('/api/auth/spotify/callback', function (req, res) {
                         return spotifyApi.getMe();
                     })
                     .then(function (data) {
-                        console.log(data.body);
+                        console.log('Authenticated as user ' + data.body.display_name);
                     });
 
                 // send back to the client after successful login

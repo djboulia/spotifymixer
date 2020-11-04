@@ -12,7 +12,7 @@ var PlayList = function (spotifyApi) {
             // Get a user's playlists
             spotifyApi.getUserPlaylists({limit: 50})
               .then(function (data) {
-                console.log('Retrieved playlists', data.body);
+                // console.log('Retrieved playlists', data.body);
 
                 const ownedItems = [];
                 const allItems = data.body.items;
@@ -55,7 +55,7 @@ var PlayList = function (spotifyApi) {
               offset: start
             })
           .then(function (data) {
-            console.log('Retrieved next chunk of playlists', data.body);
+            // console.log('Retrieved next chunk of playlists', data.body);
   
             const chunktracks = data.body.items;
   
@@ -96,13 +96,14 @@ var PlayList = function (spotifyApi) {
         // Get a user's playlists
         spotifyApi.getPlaylist(playListId)
           .then(function (data) {
-            console.log('Retrieved playlists', data.body);
   
             const tracks = data.body.tracks.items;
             const limit = data.body.tracks.limit;
             const offset = data.body.tracks.offset;
             const total = data.body.tracks.total;
-  
+
+            console.log('Retrieved playlist with total of '+ total + ' tracks');
+            
             if ((offset + limit) < total) {
               // more tracks to retrieve, do that here
   

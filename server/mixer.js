@@ -227,7 +227,7 @@ var Mixer = function (spotifyApi) {
 
           const sortedStats = sortStats(stats);
 
-          console.log("sorted stats: ", sortedStats);
+          // console.log("sorted stats: ", sortedStats);
 
           const mixList = buildPlaylist(sortedStats);
           TrackUtils.printTracks(mixList);
