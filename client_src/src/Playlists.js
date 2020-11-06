@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
+import Modal from '@material-ui/core/Modal';
 import Title from './Title';
 import { LinearProgress } from '@material-ui/core';
 import Dashboard from './Dashboard';
@@ -47,33 +48,33 @@ export default function Playlists() {
         if (result.shuffled === 0 || result.total === 0) {
           setPercentComplete(0);
         } else {
-          setPercentComplete(result.shuffled/result.total * 100);
+          setPercentComplete(result.shuffled / result.total * 100);
         }
 
         // set another time out
         setTimeout(() => {
           console.log('In Timeout');
           checkProgress();
-        }, 1000);                
+        }, 1000);
       } else {
         setInProgress(false);
         clearTimeout();
       }
-    
+
     } catch (error) {
       console.log("error checking progress!");
       setErrMsg("Error communicating with server!");
     }
   };
 
-  const startProgressTimer = function() {
+  const startProgressTimer = function () {
     setTimeout(() => {
       console.log('In Timeout');
       checkProgress();
     }, 1000);
   };
 
-  const shuffle = function(playListId, name) {
+  const shuffle = function (playListId, name) {
     console.log("id :" + playListId);
 
     SpotifyApi.shuffle(playListId);
@@ -89,16 +90,16 @@ export default function Playlists() {
     const fetchData = async () => {
       setHasLoaded(false);
       setErrMsg("");
- 
+
       try {
         const me = await SpotifyApi.me();
         const playlists = await SpotifyApi.getPlayLists();
         const progress = await SpotifyApi.progress();
- 
+
         setName(me.display_name);
         setPlaylist(playlists);
         setHasLoaded(true);
-        
+
         // each time we load the page, 
         // check to see if a previous shuffle is still in progress
         if (progress.inProgress) {
@@ -110,7 +111,7 @@ export default function Playlists() {
         setErrMsg("Error loading user data!");
       }
     };
- 
+
     fetchData();
   }, []);
 
@@ -124,38 +125,45 @@ export default function Playlists() {
   }
 
   const progressIndicator = (
-    <div style={{position: "fixed", width: "75%"}}>
-      <Alert severity="info">Shuffling {inProgressName}</Alert>
-      <LinearProgress variant="determinate" value={percentComplete}></LinearProgress>
-   </div>
+    <Modal
+      open={true}
+      aria-labelledby="simple-modal-title"
+      aria-describedby="simple-modal-description"
+    >
+      <div>
+        <Alert severity="info">Shuffling {inProgressName}</Alert>
+        <LinearProgress variant="determinate" value={percentComplete}></LinearProgress>
+      </div>
+    </Modal>
   );
 
-  return (  
-      <Dashboard>
-        {inProgress && progressIndicator}
+  return (
+    <Dashboard>
 
-        <Title>Playlists for {name}</Title>
+      {inProgress && progressIndicator}
 
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Action</TableCell>
-                <TableCell></TableCell>
-                <TableCell>Playlist</TableCell>
-                <TableCell align="right">Songs</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {playlist.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell><Button onClick={() => { shuffle(row.id, row.name) }} disabled={inProgress} variant="contained" color="primary">Shuffle</Button></TableCell>
-                  <TableCell><img width="40" src={row.img}></img></TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell align="right">{row.total}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Dashboard>  
+      <Title>Playlists for {name}</Title>
+
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Action</TableCell>
+            <TableCell></TableCell>
+            <TableCell>Playlist</TableCell>
+            <TableCell align="right">Songs</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {playlist.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell><Button onClick={() => { shuffle(row.id, row.name) }} disabled={inProgress} variant="contained" color="primary">Shuffle</Button></TableCell>
+              <TableCell><img width="40" src={row.img}></img></TableCell>
+              <TableCell>{row.name}</TableCell>
+              <TableCell align="right">{row.total}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Dashboard>
   );
 }

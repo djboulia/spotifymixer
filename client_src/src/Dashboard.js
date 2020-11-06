@@ -115,7 +115,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Dashboard(props) {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -143,11 +143,12 @@ export default function Dashboard(props) {
         </Toolbar>
       </AppBar>
       <Drawer
-        variant="permanent"
+        variant="temporary"
+        open={open}
+        onClose={handleDrawerClose}
         classes={{
           paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
         }}
-        open={open}
       >
         <div className={classes.toolbarIcon}>
           <IconButton onClick={handleDrawerClose}>
