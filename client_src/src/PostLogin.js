@@ -1,60 +1,43 @@
-import React, {Component} from 'react';
-import {Redirect} from 'react-router-dom'
+import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom'
 import { LinearProgress } from '@material-ui/core';
 import SpotifyApi from './SpotifyApi'
 
-class PostLogin extends Component {
+export default function PostLogin(props) {
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [redirectTo, setRedirectTo] = React.useState(undefined);
 
-  constructor() {
-    super();
-
-    this.state = {
-      loggedIn: false,
-      redirectTo: undefined
-    }
-  }
-
-  componentDidMount() {
-    console.log("in componentDidMount");
-    this.isLoggedIn();
-  }
-
-  isLoggedIn() {
+  React.useEffect(() => {
     SpotifyApi.authenticated()
-      .then( (result) => {
+      .then((result) => {
         console.log("isLoggedIn " + result);
         if (result) {
-          this.setState({loggedIn : true, redirectTo : "/main"});
+          setLoggedIn(true);
+          setRedirectTo("/main");
         } else {
-          this.setState({loggedIn : true, redirectTo : "/login"});
+          setLoggedIn(true);
+          setRedirectTo("/login");
         }
       })
-  }
+  }, []);
 
-  render() {
-
-    console.log("this.props ", this.props);
+    console.log("props ", props);
     let from = {
-        from: {
-            pathname: '/'
-          }
+      from: {
+        pathname: '/'
+      }
     }
 
-    if (this.props && this.props.location && this.props.location.state) {
-        from = this.props.location.state       
+    if (props && props.location && props.location.state) {
+      from = props.location.state
     }
-
-    const redirectTo = this.state.redirectTo;
 
     if (redirectTo) {
-      console.log("Redirecting to " + redirectTo );
-      return <Redirect to={redirectTo}/>
+      console.log("Redirecting to " + redirectTo);
+      return <Redirect to={redirectTo} />
     }
 
     return (
       <LinearProgress></LinearProgress>
     )
-  }
 }
-
-export default PostLogin;

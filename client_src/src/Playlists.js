@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Alert from '@material-ui/lab/Alert';
+import { LinearProgress } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -8,8 +8,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
+import Alert from '@material-ui/lab/Alert';
 import Title from './Title';
-import { LinearProgress } from '@material-ui/core';
 import Dashboard from './Dashboard';
 import SpotifyApi from './SpotifyApi';
 
@@ -57,6 +57,7 @@ export default function Playlists() {
           checkProgress();
         }, 1000);
       } else {
+        // complete - stop in progress indicator and clear timeout
         setInProgress(false);
         clearTimeout();
       }
@@ -145,6 +146,7 @@ export default function Playlists() {
       <Title>Playlists for {name}</Title>
 
       <Table size="small">
+
         <TableHead>
           <TableRow>
             <TableCell>Action</TableCell>
@@ -153,6 +155,7 @@ export default function Playlists() {
             <TableCell align="right">Songs</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {playlist.map((row) => (
             <TableRow key={row.id}>
@@ -163,6 +166,7 @@ export default function Playlists() {
             </TableRow>
           ))}
         </TableBody>
+
       </Table>
     </Dashboard>
   );
