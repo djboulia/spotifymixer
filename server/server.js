@@ -16,9 +16,7 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var SpotifyWebApi = require('spotify-web-api-node');
 var PlayList = require('./playlist');
-var Mixer = require('./mixer');
-var TrackUtils = require('./trackutils');
-var ShuffleProgress = require('./shuffleprogress');
+var ShuffleState = require('./shufflestate');
 const {
     access
 } = require('fs');
@@ -97,7 +95,8 @@ async function getSpotifyApi(session) {
 
 const stateKey = 'spotify_auth_state';
 
-const shuffleProgress = new ShuffleProgress();
+// hold our shuffle state for each session
+const shuffleState = new ShuffleState();
 
 const app = express();
 
@@ -195,68 +194,40 @@ app.get('/api/spotify/playlists', function (req, res) {
 });
 
 app.get('/api/spotify/progress', function (req, res) {
+    const session = req.session
+    let shuffleProgress = shuffleState.get(session);
+
+    if (!shuffleProgress) {
+        console.log("No shuffle in progress, creating new shuffle state");
+
+        shuffleProgress = shuffleState.add(session);
+    }
+ 
     res.setHeader('Content-Type', 'application/json');
     res.end(shuffleProgress.json());
 });
 
-/**
- * callback function for updating progress as we re-order tracks
- * @param {Number} shuffled tracks shuffled so far
- * @param {Number} total total number of tracks
- */
-var updateShuffleProgress = function (shuffled, total) {
-    console.log("updateShuffleProgress " + shuffled);
-    shuffleProgress.setShuffled(shuffled);
-}
-
 app.get('/api/spotify/shuffle', function (req, res) {
     const playListId = req.query.playListId || null;
-
-    shuffleProgress.start();
+    const session = req.session;
 
     getSpotifyApi(req.session)
         .then(function (spotifyApi) {
-            const playList = new PlayList(spotifyApi);
-            playList.getName(playListId)
-                .then(function (name) {
-                    shuffleProgress.setPlaylist(name);
-                })
+            // kick off a shuffle... this could take a while, so we
+            // return immediately and the caller can check the state
+            // via the /progress api
+            const shuffleProgress = shuffleState.add(session);
 
-            const mixer = new Mixer(spotifyApi);
-            mixer.mixTracks(playListId)
-                .then(function (result) {
+            shuffleProgress.shuffle(spotifyApi, playListId);
 
-                    shuffleProgress.setArtists(result.artists);
-                    shuffleProgress.setTotal(result.before.length);
-
-                    mixer.reorderPlaylist(playListId, result.before, result.after, updateShuffleProgress)
-                        .then(function () {
-                            // go back and look at this playlist to verify it's in the right order
-                            playList.getTracks(playListId)
-                                .then(function (tracks) {
-                                    if (TrackUtils.identicalTrackLists(result.after, tracks)) {
-                                        console.log("Track lists match!");
-                                    }
-                                    shuffleProgress.complete();
-                                }, function (err) {
-                                    console.log("Error: ", err);
-                                    shuffleProgress.complete();
-                                })
-                        }, function (err) {
-                            console.log("Error: ", err);
-                            shuffleProgress.complete();
-                        })
-                }, function (err) {
-                    console.log("Error: ", err);
-                    shuffleProgress.complete();
-                });
+            res.setHeader('Content-Type', 'application/json');
+            res.end(shuffleProgress.json());        
         }, function (err) {
             console.log("Error: ", err);
-            shuffleProgress.complete();
+            res.setHeader('Content-Type', 'application/json');
+            res.status(500);
+            res.send(JSON.stringify(err));
         });
-
-    res.setHeader('Content-Type', 'application/json');
-    res.end(shuffleProgress.json());
 });
 
 app.get('/api/auth/spotify/callback', function (req, res) {
