@@ -7,11 +7,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
-import Modal from '@material-ui/core/Modal';
 import Alert from '@material-ui/lab/Alert';
 import Title from './Title';
 import Dashboard from './Dashboard';
 import SpotifyApi from './SpotifyApi';
+import ProgressModal from './PlaylistProgressModal';
 
 // Generate Playlist Data
 
@@ -34,6 +34,7 @@ export default function Playlists() {
   const [inProgress, setInProgress] = React.useState(false);
   const [inProgressName, setInProgressName] = React.useState("Play List");
   const [percentComplete, setPercentComplete] = React.useState(0);
+  const [artists, setArtists] = React.useState([]);
 
   // set a timer to monitor progress
   const checkProgress = async () => {
@@ -51,7 +52,14 @@ export default function Playlists() {
           setPercentComplete(result.shuffled / result.total * 100);
         }
 
-        // set another time out
+        // update play list name
+        if (result.playList != "") {
+          setInProgressName( result.playList );
+        }
+
+        setArtists(result.artists);
+
+        // still in proogress, so set another time out to check again
         setTimeout(() => {
           console.log('In Timeout');
           checkProgress();
@@ -82,7 +90,7 @@ export default function Playlists() {
 
     setInProgress(true);
     setPercentComplete(0);
-    setInProgressName(name);
+    setArtists([]);
 
     startProgressTimer();
   }
@@ -126,16 +134,11 @@ export default function Playlists() {
   }
 
   const progressIndicator = (
-    <Modal
-      open={true}
-      aria-labelledby="simple-modal-title"
-      aria-describedby="simple-modal-description"
-    >
-      <div>
-        <Alert severity="info">Shuffling {inProgressName}</Alert>
-        <LinearProgress variant="determinate" value={percentComplete}></LinearProgress>
-      </div>
-    </Modal>
+    <ProgressModal
+      playlist={inProgressName}
+      percentComplete={percentComplete}
+      artists={artists}
+    />
   );
 
   return (

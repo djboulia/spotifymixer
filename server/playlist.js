@@ -90,6 +90,28 @@ var PlayList = function (spotifyApi) {
       });
     };
   
+    this.getName = function (playListId) {
+      return new Promise(function (resolve, reject) {
+        // Get the authenticated user
+        // Get a user's playlists
+        spotifyApi.getPlaylist(playListId)
+          .then(function (data) {
+  
+            const name = data.body.name;
+
+            console.log('Retrieved playlist name '+ name );
+
+            // have all of the tracks, just return
+            resolve(name);
+  
+          }, function (err) {
+            console.log('Something went wrong!', err);
+            reject(err);
+          });
+  
+      });
+    };
+  
     this.getTracks = function (playListId) {
       return new Promise(function (resolve, reject) {
         // Get the authenticated user

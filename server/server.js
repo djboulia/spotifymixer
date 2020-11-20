@@ -95,11 +95,11 @@ async function getSpotifyApi(session) {
     return spotifyApi;
 };
 
-var stateKey = 'spotify_auth_state';
+const stateKey = 'spotify_auth_state';
 
-let shuffleProgress = new ShuffleProgress();
+const shuffleProgress = new ShuffleProgress();
 
-var app = express();
+const app = express();
 
 app.use(cors())
 
@@ -216,30 +216,32 @@ app.get('/api/spotify/shuffle', function (req, res) {
 
     getSpotifyApi(req.session)
         .then(function (spotifyApi) {
-            const mixer = new Mixer(spotifyApi);
+            const playList = new PlayList(spotifyApi);
+            playList.getName(playListId)
+                .then(function (name) {
+                    shuffleProgress.setPlaylist(name);
+                })
 
-            mixer.catalogTracks(playListId)
+            const mixer = new Mixer(spotifyApi);
+            mixer.mixTracks(playListId)
                 .then(function (result) {
 
+                    shuffleProgress.setArtists(result.artists);
                     shuffleProgress.setTotal(result.before.length);
 
-                    mixer.reorderTracks(playListId, result.before, result.after, updateShuffleProgress)
-                        .then(function (result2) {
+                    mixer.reorderPlaylist(playListId, result.before, result.after, updateShuffleProgress)
+                        .then(function () {
                             // go back and look at this playlist to verify it's in the right order
-                            const playList = new PlayList(spotifyApi);
                             playList.getTracks(playListId)
                                 .then(function (tracks) {
-                                        if (TrackUtils.identicalTrackLists(result.after, tracks)) {
-                                            console.log("Track lists match!");
-                                            shuffleProgress.complete();
-                                        } else {
-                                            shuffleProgress.complete();
-                                        }
-                                    },
-                                    function (err) {
-                                        console.log("Error: ", err);
-                                        shuffleProgress.complete();
-                                    })
+                                    if (TrackUtils.identicalTrackLists(result.after, tracks)) {
+                                        console.log("Track lists match!");
+                                    }
+                                    shuffleProgress.complete();
+                                }, function (err) {
+                                    console.log("Error: ", err);
+                                    shuffleProgress.complete();
+                                })
                         }, function (err) {
                             console.log("Error: ", err);
                             shuffleProgress.complete();
@@ -301,7 +303,7 @@ app.get('/api/auth/spotify/callback', function (req, res) {
                 req.session.expires_at = Date.now() + (expires_in * 1000);
 
                 getSpotifyApi(req.session)
-                    .then(function(spotifyApi) {
+                    .then(function (spotifyApi) {
                         return spotifyApi.getMe();
                     })
                     .then(function (data) {

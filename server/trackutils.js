@@ -1,6 +1,14 @@
 
+/**
+ * helper functions for working with track lists.
+ */
 var TrackUtils = {
 
+    /**
+     * randomly shuffles a set of tracks
+     * 
+     * @param {Array} tracks the tracks to shuffle
+     */
     shuffle : function (tracks) {
       let currentIndex = tracks.length,
         temporaryValue, randomIndex;
