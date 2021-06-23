@@ -15,9 +15,11 @@ WORKDIR /app/client_src
 
 RUN npm install --production
 
-RUN npm run build
+RUN npm run dockerbuild
 
 WORKDIR /app
+
+RUN mv client_src/build client
 
 EXPOSE 8080
 CMD [ "node", "server/server.js" ]
