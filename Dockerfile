@@ -15,7 +15,7 @@ WORKDIR /app/client_src
 
 RUN npm install --production
 
-RUN npm build
+RUN npm run build
 
 WORKDIR /app
 
