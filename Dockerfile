@@ -11,5 +11,13 @@ RUN npm install --production
 
 COPY . .
 
+WORKDIR /app/client_src
+
+RUN npm install --production
+
+RUN npm build
+
+WORKDIR /app
+
 EXPOSE 8080
 CMD [ "node", "server/server.js" ]
