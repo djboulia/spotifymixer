@@ -35,3 +35,10 @@ So here are the basic rules I came up with:
 - Look for like-named songs across artists.  Swap appropriately to keep them apart
 - Layout the new playlist
 
+## Deployment
+The original implementation was as a Cloud Foundry application.  The manifest.yml defines the configuration for CF.
+
+I later Docker-ized the application.  See Dockerfile in the root directory for that configuration.
+
+The Docker version can be deployed via IBM Cloud Engine to be run as a serverless implementation.
+
