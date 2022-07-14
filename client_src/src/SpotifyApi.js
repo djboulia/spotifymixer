@@ -59,8 +59,20 @@ const SpotifyApi = {
     },
 
     logout() {
-        console.log("logout");
-        loginState.set(false);
+        return new Promise((resolve, reject) => {
+            return axios.get(`/api/logout`).then(res => {
+                console.log(res);
+                console.log("logout");
+                loginState.set(false);
+        
+                resolve();
+            }).catch((e) => {
+                console.log("error: " + JSON.stringify(e.response));
+                loginState.set(false);
+
+                reject("error");
+            })
+        })
     },
 
     me() {

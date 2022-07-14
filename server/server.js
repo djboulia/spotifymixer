@@ -75,6 +75,10 @@ async function refreshToken(session, spotifyApi) {
 }
 
 async function getSpotifyApi(session) {
+    if (!session) {
+        throw new Error('invalid session');
+    }
+
     const spotifyApi = new SpotifyWebApi({
         accessToken: session.access_token,
         refreshToken: session.refresh_token,
@@ -142,6 +146,22 @@ app.get('/api/authenticated', function (req, res) {
     res.end(JSON.stringify(response));
 });
 
+app.get('/api/logout', function (req, res) {
+    res.cookie(stateKey, null);
+
+    if (req.session) {
+        req.session.destroy(err => {
+            if (err) {
+                console.log("unable to log out");
+                res.status(400).send('Unable to log out')
+            } else {
+                res.send('Logout successful')
+                console.log('Logout successful')
+            }
+        });
+    }
+});
+
 app.get('/api/spotify/me', function (req, res) {
     getSpotifyApi(req.session)
         .then(function (spotifyApi) {
@@ -202,7 +222,7 @@ app.get('/api/spotify/progress', function (req, res) {
 
         shuffleProgress = shuffleState.add(session);
     }
- 
+
     res.setHeader('Content-Type', 'application/json');
     res.end(shuffleProgress.json());
 });
@@ -221,7 +241,7 @@ app.get('/api/spotify/shuffle', function (req, res) {
             shuffleProgress.shuffle(spotifyApi, playListId);
 
             res.setHeader('Content-Type', 'application/json');
-            res.end(shuffleProgress.json());        
+            res.end(shuffleProgress.json());
         }, function (err) {
             console.log("Error: ", err);
             res.setHeader('Content-Type', 'application/json');
