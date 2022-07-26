@@ -8,7 +8,6 @@
  *          total is the total to be shuffled
  */
 
-var PlayList = require('./playlist');
 var Mixer = require('./mixer');
 var TrackUtils = require('./trackutils');
 
@@ -107,13 +106,13 @@ var ShuffleProgress = function () {
             self.setShuffled(shuffled);
         }
 
-        const playList = new PlayList(spotifyApi);
-        playList.getName(playListId)
+        const mixer = new Mixer(spotifyApi);
+
+        mixer.getName(playListId)
             .then(function (name) {
                 self.setPlaylist(name);
             })
 
-        const mixer = new Mixer(spotifyApi);
         mixer.mixTracks(playListId)
             .then(function (result) {
 
@@ -123,10 +122,17 @@ var ShuffleProgress = function () {
                 mixer.reorderPlaylist(playListId, result.before, result.after, updateShuffleProgress)
                     .then(function () {
                         // go back and look at this playlist to verify it's in the right order
-                        playList.getTracks(playListId)
-                            .then(function (tracks) {
+                        mixer.getTracks(playListId)
+                            .then(function (data) {
+                                const tracks = data.tracks;
+
                                 if (TrackUtils.identicalTrackLists(result.after, tracks)) {
                                     console.log("Track lists match!");
+                                } else {
+                                    console.log("expected: ");
+                                    TrackUtils.printTracks(result.after);
+                                    console.log("got: ");
+                                    TrackUtils.printTracks(tracks);
                                 }
                                 self.complete();
                             }, function (err) {
