@@ -90,6 +90,7 @@ export default function Playlists() {
 
     setInProgress(true);
     setPercentComplete(0);
+    setInProgressName("Play List");
     setArtists([]);
 
     startProgressTimer();
