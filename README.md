@@ -4,8 +4,17 @@ Radio mix of Spotify playlists
 
 ## How to use
 
+Production
+
 ```
 npm start
+
+```
+
+Development
+
+```
+npm run dev
 
 ```
 
@@ -42,3 +51,5 @@ I later Docker-ized the application.  See Dockerfile in the root directory for t
 
 The Docker version can be deployed via IBM Cloud Engine to be run as a serverless implementation.
 
+I also deployed to Azure App Engine.  To do that, follow these steps:
+az webapp up
