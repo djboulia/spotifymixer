@@ -4,6 +4,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import LayersIcon from '@material-ui/icons/Layers';
+import InfoIcon from '@material-ui/icons/Info';
 
 
 export const mainListItems = (
@@ -20,6 +21,13 @@ export const mainListItems = (
         <LayersIcon />
       </ListItemIcon>
       <ListItemText primary="Logout" />
+    </ListItem>
+
+    <ListItem button component="a" href="/about">
+      <ListItemIcon>
+        <InfoIcon />
+      </ListItemIcon>
+      <ListItemText primary="About" />
     </ListItem>
   </div>
 );
