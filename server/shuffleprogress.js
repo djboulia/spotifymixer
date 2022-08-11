@@ -22,7 +22,11 @@ var ShuffleProgress = function () {
      * return an JSON string with the current shuffle status
      */
     this.json = function () {
-        return JSON.stringify({
+        return JSON.stringify(this.obj());
+    }
+
+    this.obj = function() {
+       return ({
             inProgress: this.inProgress,
             shuffled: this.shuffled,
             total: this.total,
