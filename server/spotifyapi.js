@@ -2,6 +2,7 @@
 var request = require('request'); // "Request" library
 
 var SpotifyWebApi = require('spotify-web-api-node');
+var SpotifyAuthState = require('./spotifyauthstate');
 
 /**
  * 
@@ -10,7 +11,9 @@ var SpotifyWebApi = require('spotify-web-api-node');
  * @param {Object} spotifyConfig credentials for Spotify
  */
 var SpotifyApi = function (spotifyConfig, redirect_uri) {
-    var sessionExpired = function (session) {
+    const authState = new SpotifyAuthState();
+
+    const sessionExpired = function (session) {
         // if the session is going to expire in 5 minutes or less,
         // refresh the token
         const expires_at = session.expires_at - (5 * 60 * 1000);
@@ -19,7 +22,7 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
         return (Date.now() >= expires_at);
     };
 
-    var getSpotifyCredentials = function (session) {
+    const getSpotifyCredentials = function (session) {
         return ({
             accessToken: session.access_token,
             refreshToken: session.refresh_token,
@@ -102,12 +105,51 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
     };
 
     /**
-     * make the call to spotify to get an access token.  when Spotify calls back 
-     * from the initial authorization request it provides a code.  we use that
+     * Set up the authorization state and build the spotify url to request authorization.
+     * When spotify calls back, it will send back the 'state' key so we can ensure we're 
+     * matching authorization requests to the right user account.
+     * 
+     * @param {Object} session this user's session
+     * @returns a url
+     */
+    this.initAuthorization = function(session) {
+        authState.init(session);
+
+        // your application requests authorization
+        var scope = "user-read-email user-read-private playlist-read-private playlist-modify-private playlist-modify-public";
+        console.log("scopes: ", scope);
+
+        const params = new URLSearchParams({
+            response_type: 'code',
+            client_id: spotifyConfig.clientId,
+            scope: scope,
+            redirect_uri: redirect_uri,
+            state: authState.get(session)
+        }).toString();
+
+       return 'https://accounts.spotify.com/authorize?' + params;
+    };
+
+    /**
+     * validate that the state sent back by Spotify matches our current state
+     * 
+     * @param {Object} session 
+     * @param {String} state state returned from Spotify callback
+     * @returns 
+     */
+    this.isValidAuthState = function( session, state ) {
+        var storedState = authState.get(session) || null;
+
+        return (state === null || state !== storedState) ? false : true;
+    };
+
+    /**
+     * make the call to spotify to get an access token.  when Spotify called back 
+     * from the initial authorization request it provided a code.  we use that
      * to get the access token
      * 
      * @param {Object} session 
-     * @param {String} code 
+     * @param {String} code returned from Spotify
      */
     this.getAccessToken = function (session, code) {
 
@@ -115,6 +157,9 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
 
         return new Promise(function (resolve, reject) {
             const authOptions = getAuthOptions(code);
+
+            // reset the state since we're completing the authorization process
+            authState.uninit(session);
 
             request.post(authOptions, function (error, response, body) {
                 if (!error && response.statusCode === 200) {

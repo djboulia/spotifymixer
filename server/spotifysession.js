@@ -3,24 +3,9 @@
  * Handle session state and authorization for Spotify
  * 
  */
- var session = require("express-session");
+var session = require("express-session");
 
- var SpotifyApi = require("./spotifyapi");
-
-/**
- * Generates a random string containing numbers and letters
- * @param  {number} length The length of the string
- * @return {string} The generated string
- */
-var generateRandomString = function (length) {
-    var text = '';
-    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (var i = 0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-};
+var SpotifyApi = require("./spotifyapi");
 
 var JsonResponse = function () {
     this.send = function (res, obj) {
@@ -47,7 +32,6 @@ var SpotifySession = function (app, serverConfig, spotifyConfig) {
     console.log("client_url ", client_url);
     console.log("redirect_uri ", redirect_uri);
 
-    const stateKey = 'spotify_auth_state';
     const jsonResponse = new JsonResponse();
 
     const spotifyApi = new SpotifyApi(spotifyConfig, redirect_uri);
@@ -71,22 +55,8 @@ var SpotifySession = function (app, serverConfig, spotifyConfig) {
             // is to send an authorization request.  Spotify will then call
             // redirect_uri to complete the authorization
 
-            var state = generateRandomString(16);
-            req.session[stateKey] = state;
-
-            // your application requests authorization
-            var scope = "user-read-email user-read-private playlist-read-private playlist-modify-private playlist-modify-public";
-            console.log("scopes: ", scope);
-
-            const params = new URLSearchParams({
-                response_type: 'code',
-                client_id: spotifyConfig.clientId,
-                scope: scope,
-                redirect_uri: redirect_uri,
-                state: state
-            }).toString();
-
-            res.redirect('https://accounts.spotify.com/authorize?' + params);
+            const authUrl = spotifyApi.initAuthorization(req.session);
+            res.redirect(authUrl);
         });
 
         app.get('/api/authenticated', function (req, res) {
@@ -103,9 +73,8 @@ var SpotifySession = function (app, serverConfig, spotifyConfig) {
 
             var code = req.query.code || null;
             var state = req.query.state || null;
-            var storedState = req.session[stateKey] || null;
 
-            if (state === null || state !== storedState) {
+            if (!spotifyApi.isValidAuthState(req.session, state)) {
                 const params = new URLSearchParams({
                     error: 'state_mismatch'
                 }).toString();
@@ -113,8 +82,6 @@ var SpotifySession = function (app, serverConfig, spotifyConfig) {
                 console.log('params: ' + params);
                 res.redirect('/#' + params);
             } else {
-                req.session[stateKey] = undefined;
-
                 spotifyApi.getAccessToken(req.session, code)
                     .then((result) => {
                         // redirect back to the client after successful login
@@ -130,14 +97,19 @@ var SpotifySession = function (app, serverConfig, spotifyConfig) {
             if (req.session) {
                 req.session.destroy(err => {
                     if (err) {
-                        console.log("unable to log out");
-                        res.status(400).send('Unable to log out')
+                        const msg = "unable to log out";
+
+                        console.log(msg);
+                        res.status(400).send(msg)
                     } else {
-                        res.send('Logout successful')
-                        console.log('Logout successful')
+                        const msg = "Logout successful";
+
+                        res.send(msg)
+                        console.log(msg)
                     }
                 });
             }
+
         });
 
     };
