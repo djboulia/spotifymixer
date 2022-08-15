@@ -9,10 +9,7 @@
  * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
  */
 
-var express = require('express'); // Express web server framework
-var cors = require('cors')
-var path = require('path');
-var cookieParser = require('cookie-parser');
+const path = require('path');
 
 require("dotenv").config();
 
@@ -26,24 +23,16 @@ const spotifyConfig = {
     clientSecret: process.env.CLIENT_SECRET
 }
 
-var ServerApi = require('./ServerApi.js');
+const ReactServer = require('./reactserver.js');
+const ServerApi = require('./ServerApi.js');
 
-const app = express();
+const clientDir = path.join(__dirname, '..', 'client');
 
-app.use(cors())
+const server = new ReactServer(clientDir);
 
-app.use(express.static(path.join(__dirname, '..', 'client')))
-    .use(cookieParser());
-
-
-const serverApi = new ServerApi(app);
+const serverApi = new ServerApi(server);
 serverApi.init(serverConfig, spotifyConfig);
 
-// catch all other non-API calls and redirect back to our REACT app
-app.get('/*', function (req, res) {
-    const defaultFile = path.join(__dirname, '..', 'client', 'index.html');
-    res.sendFile(defaultFile);
-});
-
-console.log('Listening on 8888');
-app.listen(process.env.PORT || 8888);
+const port = process.env.PORT || 8888;
+console.log(`Listening on ${port}`);
+server.listen(port);

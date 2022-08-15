@@ -4,13 +4,16 @@ var request = require('request'); // "Request" library
 var SpotifyWebApi = require('spotify-web-api-node');
 var SpotifyAuthState = require('./spotifyauthstate');
 
+const SPOTIFY_URL = 'https://accounts.spotify.com';
+
 /**
  * 
- * handles initializing the spotify api, including token management/refresh
+ * handles initializing the spotify web api, including token management/refresh
  * 
- * @param {Object} spotifyConfig credentials for Spotify
+ * @param {Object} spotifyConfig id and secret credentials for Spotify
+ * @param {String} redirectUri uri spotify will use for the callback phase
  */
-var SpotifyApi = function (spotifyConfig, redirect_uri) {
+var SpotifyApi = function (spotifyConfig, redirectUri) {
     const authState = new SpotifyAuthState();
 
     const sessionExpired = function (session) {
@@ -26,7 +29,7 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
         return ({
             accessToken: session.access_token,
             refreshToken: session.refresh_token,
-            redirectUri: redirect_uri,
+            redirectUri: redirectUri,
             clientId: spotifyConfig.clientId,
             clientSecret: spotifyConfig.clientSecret
         });
@@ -49,6 +52,13 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
         return spotifyApi;
     }
 
+    /**
+     * returns an initialized spotify API, refreshing access tokens behind the
+     * scenes if they have expired
+     * 
+     * @param {Object} session 
+     * @returns the initialized spotifyApi
+     */
     async function getSpotifyApi(session) {
         if (!session) {
             throw new Error('invalid session');
@@ -69,10 +79,10 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
 
     const getAuthOptions = function (code) {
         const authOptions = {
-            url: 'https://accounts.spotify.com/api/token',
+            url: SPOTIFY_URL + '/api/token',
             form: {
                 code: code,
-                redirect_uri: redirect_uri,
+                redirect_uri: redirectUri,
                 grant_type: 'authorization_code'
             },
             headers: {
@@ -123,11 +133,11 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
             response_type: 'code',
             client_id: spotifyConfig.clientId,
             scope: scope,
-            redirect_uri: redirect_uri,
+            redirect_uri: redirectUri,
             state: authState.get(session)
         }).toString();
 
-       return 'https://accounts.spotify.com/authorize?' + params;
+       return SPOTIFY_URL + '/authorize?' + params;
     };
 
     /**
@@ -135,7 +145,7 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
      * 
      * @param {Object} session 
      * @param {String} state state returned from Spotify callback
-     * @returns 
+     * @returns true if the state is valid, false otherwise
      */
     this.isValidAuthState = function( session, state ) {
         var storedState = authState.get(session) || null;
@@ -182,13 +192,27 @@ var SpotifyApi = function (spotifyConfig, redirect_uri) {
         });
     };
 
+    /**
+     * Make sure we've gone through the auth process and have an access token
+     * 
+     * @param {Object} session 
+     * @returns true if an access token exists, false otherwise
+     */
+    this.isAuthenticated = function (session) {
+        return (session.access_token) ? true : false;
+    };
+
+    /**
+     * return an initialized spotifyApi which can be used to make calls to 
+     * the authenticated user's spotify account.
+     * 
+     * @param {Object} session 
+     * @returns the initialized api
+     */
     this.get = function (session) {
         return getSpotifyApi(session);
     };
 
-    this.isAuthenticated = function (session) {
-        return (session.access_token) ? true : false;
-    };
 }
 
 module.exports = SpotifyApi;

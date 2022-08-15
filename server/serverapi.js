@@ -8,7 +8,7 @@ const PlayList = require('./playlist');
 const ShuffleState = require('./shufflestate');
 const SpotifySession = require('./spotifysession');
 
-var ServerApi = function (app) {
+var ServerApi = function (server) {
 
     // hold our shuffle state for each session
     const shuffleState = new ShuffleState();
@@ -88,7 +88,7 @@ var ServerApi = function (app) {
             shuffleProgress = shuffleState.add(session);
         }
 
-        return shuffleProgress.obj();
+        return shuffleProgress.status();
     }
 
     async function spotifyShuffle(spotifyApi, context) {
@@ -104,20 +104,20 @@ var ServerApi = function (app) {
 
         shuffleProgress.shuffle(spotifyApi, playListId);
 
-        return shuffleProgress.obj();
+        return shuffleProgress.status();
     }
 
 
     this.init = function (serverConfig, spotifyConfig) {
 
-        const spotifySession = new SpotifySession(app, serverConfig, spotifyConfig);
+        const spotifySession = new SpotifySession(server, serverConfig, spotifyConfig);
         spotifySession.init();
 
         // register each entry point and their associated handlers
-        spotifySession.entryPoint('/api/spotify/me', spotifyMe);
-        spotifySession.entryPoint('/api/spotify/playlists', spotifyPlaylists);
-        spotifySession.entryPoint('/api/spotify/progress', spotifyProgress);
-        spotifySession.entryPoint('/api/spotify/shuffle', spotifyShuffle);
+        spotifySession.addApi('/api/spotify/me', spotifyMe);
+        spotifySession.addApi('/api/spotify/playlists', spotifyPlaylists);
+        spotifySession.addApi('/api/spotify/progress', spotifyProgress);
+        spotifySession.addApi('/api/spotify/shuffle', spotifyShuffle);
 
     };
 
