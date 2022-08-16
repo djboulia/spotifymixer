@@ -23,7 +23,7 @@ export default function PlaylistProgressModal(props) {
       // only show artists with at least 2 tracks
       if (artist.artist != '[singles]') {
         rows.push(
-          <TableRow>
+          <TableRow key={i}>
             <TableCell>
               {artist.artist}
             </TableCell>
@@ -61,7 +61,7 @@ export default function PlaylistProgressModal(props) {
       fullWidth={true}
       maxWidth="sm"
       aria-labelledby="simple-dialog-title"
-      open={open}
+      open={true}
     >
       <DialogTitle id="simple-dialog-title">Shuffling {props.playlist}</DialogTitle>
 
