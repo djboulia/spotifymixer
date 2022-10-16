@@ -4,7 +4,6 @@
  * 
  */
 const SpotifyApi = require("./spotifyapi");
-const Redirect = require('./redirect');
 
 var SpotifySession = function (server, serverConfig, spotifyConfig) {
     const CALLBACK_PATH = '/api/auth/spotify/callback';
@@ -31,7 +30,7 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
             // redirect_uri to complete the authorization
 
             const authUrl = spotifyApi.initAuthorization(context.session);
-            return new Redirect(authUrl);
+            return server.redirect(authUrl);
         }
 
         async function authenticated(context) {
@@ -56,17 +55,17 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
                 }).toString();
 
                 console.log('params: ' + params);
-                return new Redirect('/#' + params);
+                return server.redirect('/#' + params);
             } else {
                 await spotifyApi.getAccessToken(context.session, code)
                     .catch((err) => {
-                        return new Redirect(client_url + '/logout');
+                        return server.redirect(client_url + '/logout');
                     })
 
                 server.login(context.session);
 
                 console.log('redirecting to postLogin');
-                return new Redirect(client_url + '/postLogin');
+                return server.redirect(client_url + '/postLogin');
             }
         }
 

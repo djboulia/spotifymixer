@@ -23,7 +23,7 @@ const spotifyConfig = {
     clientSecret: process.env.CLIENT_SECRET
 }
 
-const ReactServer = require('./reactserver.js');
+const ReactServer = require('@apiserver/reactserver');
 const ServerApi = require('./ServerApi.js');
 
 const clientDir = path.join(__dirname, '..', 'client');
