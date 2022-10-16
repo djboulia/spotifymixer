@@ -24,7 +24,7 @@ const spotifyConfig = {
 }
 
 const ReactServer = require('@apiserver/reactserver');
-const ServerApi = require('./ServerApi.js');
+const ServerApi = require('./serverapi.js');
 
 const clientDir = path.join(__dirname, '..', 'client');
 
