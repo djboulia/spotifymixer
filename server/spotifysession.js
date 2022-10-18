@@ -62,15 +62,13 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
                         return server.redirect(client_url + '/logout');
                     })
 
-                server.login(context.session);
-
                 console.log('redirecting to postLogin');
                 return server.redirect(client_url + '/postLogin');
             }
         }
 
         async function logout(context) {
-            const msg = await server.logout(context.session);
+            const msg = await server.reset(context.session);
 
             return msg;
         }
@@ -80,6 +78,16 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
         server.method(CALLBACK_PATH, 'GET', callback);
         server.method('/api/logout', 'GET', logout);
     };
+
+    const auth = async function(context) {
+        console.log('spotify auth check');
+        
+        if (!spotifyApi.isAuthenticated(context.session)) {
+            throw server.serverError(401, 'Please authenticate with the Spotify API first');
+        }
+
+        return true;
+    }
 
     /**
      * Used to add api entry points for SpotifyMixer.  The fn provided will 
@@ -91,10 +99,6 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
      */
     this.addApi = function (path, fn) {
         async function apiHandler(context) {
-            if (!spotifyApi.isAuthenticated(context.session)) {
-                throw new Error('Please authenticate with the Spotify API first');
-            }
-
             const api = await spotifyApi.get(context.session)
                 .catch((e) => {
                     throw new Error('Could not get Spotify API');
@@ -104,7 +108,7 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
             return fn(api, context);
         }
 
-        server.method(path, 'GET', apiHandler);
+        server.method(path, 'GET', apiHandler, auth);
     }
 };
 

@@ -113,7 +113,7 @@ var ServerApi = function (server) {
         const spotifySession = new SpotifySession(server, serverConfig, spotifyConfig);
         spotifySession.init();
 
-        // register each entry point and their associated handlers
+        // register each entry that required acccess to the spotify api
         spotifySession.addApi('/api/spotify/me', spotifyMe);
         spotifySession.addApi('/api/spotify/playlists', spotifyPlaylists);
         spotifySession.addApi('/api/spotify/progress', spotifyProgress);
