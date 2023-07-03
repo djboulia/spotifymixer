@@ -6,7 +6,6 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import LayersIcon from '@material-ui/icons/Layers';
 import InfoIcon from '@material-ui/icons/Info';
 
-
 export const mainListItems = (
   <div>
     <ListItem button component="a" href="/main">
@@ -14,6 +13,13 @@ export const mainListItems = (
         <DashboardIcon />
       </ListItemIcon>
       <ListItemText primary="Home" />
+    </ListItem>
+
+    <ListItem button component="a" href="/multiple">
+      <ListItemIcon>
+        <DashboardIcon />
+      </ListItemIcon>
+      <ListItemText primary="Shuffle Multiple" />
     </ListItem>
 
     <ListItem button component="a" href="/logout">

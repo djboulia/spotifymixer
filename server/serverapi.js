@@ -1,7 +1,7 @@
 /**
- * 
+ *
  * Encapsulate all of our backend server API calls
- * 
+ *
  */
 
 const PlayList = require('./playlist');
@@ -9,118 +9,130 @@ const ShuffleState = require('./shufflestate');
 const SpotifySession = require('./spotifysession');
 
 var ServerApi = function (server) {
+  // hold our shuffle state for each session
+  const shuffleState = new ShuffleState();
 
-    // hold our shuffle state for each session
-    const shuffleState = new ShuffleState();
+  // handlers for our backend API entry points
+  async function spotifyMe(spotifyApi) {
+    const data = await spotifyApi.getMe();
 
-    // handlers for our backend API entry points
-    async function spotifyMe(spotifyApi) {
-        const data = await spotifyApi.getMe();
+    console.log('Found user ' + data.body.display_name);
 
-        console.log("Found user " + data.body.display_name);
+    return data.body;
+  }
 
-        return data.body;
+  async function spotifyPlaylists(spotifyApi) {
+    const playList = new PlayList(spotifyApi);
+
+    const items = await playList.getOwnedPlayLists();
+
+    // go through the play list and extract what we want
+    console.log('playlists: ');
+    const list = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      // console.log("tracks: ", item.tracks);
+      // console.log("images: ", item.images);
+      console.log(item.name);
+
+      list.push({
+        id: item.id,
+        name: item.name,
+        img: item.images.length > 0 ? item.images[0].url : '',
+        total: item.tracks.total,
+      });
     }
 
-    async function spotifyPlaylists(spotifyApi) {
-        const playList = new PlayList(spotifyApi);
+    return list;
+  }
 
-        const data = await playList.getOwnedPlayLists();
+  async function spotifyProgress(spotifyApi, context) {
+    const session = context.session;
+    let shuffleProgress = shuffleState.get(session);
 
-        // go through the play list and extract what we want
-        console.log("playlists: ");
-        const list = [];
+    if (!shuffleProgress) {
+      console.log('No shuffle in progress, creating new shuffle state');
 
-        for (let i = 0; i < data.items.length; i++) {
-            const item = data.items[i];
-
-            // console.log("tracks: ", item.tracks);
-            // console.log("images: ", item.images);
-            console.log(item.name);
-
-            list.push({
-                id: item.id,
-                name: item.name,
-                img: (item.images.length > 0) ? item.images[0].url : "",
-                total: item.tracks.total
-            })
-
-        }
-
-        return list;
+      shuffleProgress = shuffleState.add(session);
     }
 
-    async function spotifyPlaylists(spotifyApi) {
-        const playList = new PlayList(spotifyApi);
+    return shuffleProgress.status();
+  }
 
-        const data = await playList.getOwnedPlayLists();
+  async function spotifyShuffle(spotifyApi, context) {
+    const session = context.session;
+    const query = context.query;
 
-        // go through the play list and extract what we want
-        console.log("playlists: ");
-        const list = [];
+    const playListId = query.playListId || null;
 
-        for (let i = 0; i < data.items.length; i++) {
-            const item = data.items[i];
+    const shuffleProgress = shuffleState.add(session);
 
-            // console.log("tracks: ", item.tracks);
-            // console.log("images: ", item.images);
-            console.log(item.name);
+    shuffleProgress.start();
 
-            list.push({
-                id: item.id,
-                name: item.name,
-                img: (item.images.length > 0) ? item.images[0].url : "",
-                total: item.tracks.total
-            })
+    // kick off a shuffle... this could take a while, so we
+    // return immediately and the caller can check the state
+    // via the /progress api
+    shuffleProgress.shufflePlayList(spotifyApi, playListId).then(
+      function () {
+        shuffleProgress.complete();
+      },
+      function (err) {
+        console.log('Error: ', err);
+        shuffleProgress.complete();
+      },
+    );
 
-        }
+    return shuffleProgress.status();
+  }
 
-        return list;
+  async function spotifyShuffleItems(spotifyApi, shuffleProgress, items) {
+    const length = items.length;
+    for (let i = 0; i < length; i++) {
+      const playListId = items[i];
+
+      // restart progress for each playlist
+      shuffleProgress.start();
+      shuffleProgress.setMultiple(i + 1, length);
+
+      await shuffleProgress.shufflePlayList(spotifyApi, playListId);
     }
 
-    async function spotifyProgress(spotifyApi, context) {
-        const session = context.session
-        let shuffleProgress = shuffleState.get(session);
+    // we are only complete when all playlists are done
+    shuffleProgress.complete();
+  }
 
-        if (!shuffleProgress) {
-            console.log("No shuffle in progress, creating new shuffle state");
+  async function spotifyShuffleMultiple(spotifyApi, context) {
+    const session = context.session;
+    const query = context.query;
 
-            shuffleProgress = shuffleState.add(session);
-        }
+    const playListString = query.playLists;
+    const playLists = playListString ? playListString.split(',') : [];
 
-        return shuffleProgress.status();
-    }
+    console.log('playLists: ', playLists);
 
-    async function spotifyShuffle(spotifyApi, context) {
-        const session = context.session;
-        const query = context.query;
+    const shuffleProgress = shuffleState.add(session);
 
-        const playListId = query.playListId || null;
+    // kick off a shuffle of ALL playlists... this will take a while, so we
+    // return immediately and the caller can check the state
+    // via the /progress api
+    spotifyShuffleItems(spotifyApi, shuffleProgress, playLists);
 
-        // kick off a shuffle... this could take a while, so we
-        // return immediately and the caller can check the state
-        // via the /progress api
-        const shuffleProgress = shuffleState.add(session);
+    return shuffleProgress.status();
+  }
 
-        shuffleProgress.shuffle(spotifyApi, playListId);
+  this.init = function (serverConfig, spotifyConfig) {
+    const spotifySession = new SpotifySession(server, serverConfig, spotifyConfig);
+    spotifySession.init();
 
-        return shuffleProgress.status();
-    }
-
-
-    this.init = function (serverConfig, spotifyConfig) {
-
-        const spotifySession = new SpotifySession(server, serverConfig, spotifyConfig);
-        spotifySession.init();
-
-        // register each entry that required acccess to the spotify api
-        spotifySession.addApi('/api/spotify/me', spotifyMe);
-        spotifySession.addApi('/api/spotify/playlists', spotifyPlaylists);
-        spotifySession.addApi('/api/spotify/progress', spotifyProgress);
-        spotifySession.addApi('/api/spotify/shuffle', spotifyShuffle);
-
-    };
-
+    // register each entry that required acccess to the spotify api
+    spotifySession.addApi('/api/spotify/me', spotifyMe);
+    spotifySession.addApi('/api/spotify/playlists', spotifyPlaylists);
+    spotifySession.addApi('/api/spotify/progress', spotifyProgress);
+    spotifySession.addApi('/api/spotify/shuffle', spotifyShuffle);
+    spotifySession.addApi('/api/spotify/shuffleMultiple', spotifyShuffleMultiple);
+  };
 };
 
 module.exports = ServerApi;

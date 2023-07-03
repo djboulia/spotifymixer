@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Alert from '@material-ui/lab/Alert';
 import Title from './Title';
 import Dashboard from './Dashboard';
@@ -20,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
   },
   shuffleAll: {
-    width: 150,
+    width: 250,
     marginBottom: 20,
     marginRight: 10,
   },
@@ -70,8 +71,14 @@ export default function Playlists() {
           checkProgress();
         }, 1000);
       } else {
+        // reset the checkboxes for the playlist
+        for (let i = 0; i < playlist.length; i++) {
+          playlist[i].checked = false;
+        }
+
         // complete - stop in progress indicator and clear timeout
         setInProgress(false);
+
         clearTimeout();
       }
     } catch (error) {
@@ -87,10 +94,15 @@ export default function Playlists() {
     }, 1000);
   };
 
-  const shuffle = function (playListId) {
-    console.log('id :' + playListId);
+  const shuffleMultiple = function () {
+    const playLists = [];
+    for (let i = 0; i < playlist.length; i++) {
+      if (playlist[i].checked) {
+        playLists.push(playlist[i].id);
+      }
+    }
 
-    SpotifyApi.shuffle(playListId);
+    SpotifyApi.shuffleMultiple(playLists);
 
     setInProgress(true);
     setPercentComplete(0);
@@ -101,16 +113,14 @@ export default function Playlists() {
     startProgressTimer();
   };
 
-  const shuffleAll = function () {
-    SpotifyApi.shuffleAll();
-
-    setInProgress(true);
-    setPercentComplete(0);
-    setPlayListDetails({ name: 'Play List', img: '' });
-    setMultipleStatus(undefined);
-    setArtists([]);
-
-    startProgressTimer();
+  const nothingSelected = function () {
+    console.log('nothingSelected called');
+    for (let i = 0; i < playlist.length; i++) {
+      if (playlist[i].checked) {
+        return false;
+      }
+    }
+    return true;
   };
 
   React.useEffect(() => {
@@ -122,6 +132,10 @@ export default function Playlists() {
         const me = await SpotifyApi.me();
         const playlists = await SpotifyApi.getPlayLists();
         const progress = await SpotifyApi.progress();
+
+        for (let i = 0; i < playlists.length; i++) {
+          playlists[i].checked = false;
+        }
 
         setName(me.display_name);
         setPlaylist(playlists);
@@ -166,8 +180,18 @@ export default function Playlists() {
 
       <Title>Playlists for {name}</Title>
 
-      <div style={{ display: 'flex', justifyContent: 'end' }}>
-        <a href="./multiple">Shuffle Multiple</a>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          onClick={() => {
+            shuffleMultiple();
+          }}
+          className={classes.shuffleAll}
+          disabled={inProgress || nothingSelected()}
+          variant="contained"
+          color="primary"
+        >
+          Shuffle Selected
+        </Button>
       </div>
 
       <Table size="small">
@@ -184,16 +208,17 @@ export default function Playlists() {
           {playlist.map((row) => (
             <TableRow key={row.id}>
               <TableCell>
-                <Button
-                  onClick={() => {
-                    shuffle(row.id);
+                <Checkbox
+                  onChange={() => {
+                    row.checked = !row.checked;
+                    console.log('checked: ' + row.checked);
+                    setPlaylist([...playlist]);
                   }}
                   disabled={inProgress}
                   variant="contained"
                   color="primary"
-                >
-                  Shuffle
-                </Button>
+                  checked={row.checked}
+                ></Checkbox>
               </TableCell>
               <TableCell>
                 <img width="40" src={row.img}></img>
