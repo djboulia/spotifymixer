@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { LinearProgress } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
@@ -158,7 +159,15 @@ export default function Playlists() {
 
   if (errMsg != '') {
     console.log('Errmsg: ' + errMsg);
-    return <Alert severity="error">{errMsg}</Alert>;
+
+    const page = '/logout';
+    console.log('Redirecting to : ' + page);
+    return (
+      <div>
+        <Alert severity="error">{errMsg}</Alert>
+        <Redirect to={page} />
+      </div>
+    );
   }
 
   if (!hasLoaded) {

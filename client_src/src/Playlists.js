@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { LinearProgress } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
@@ -18,11 +19,6 @@ import ProgressModal from './PlaylistProgressModal';
 const useStyles = makeStyles((theme) => ({
   seeMore: {
     marginTop: theme.spacing(3),
-  },
-  shuffleAll: {
-    width: 150,
-    marginBottom: 20,
-    marginRight: 10,
   },
 }));
 
@@ -101,18 +97,6 @@ export default function Playlists() {
     startProgressTimer();
   };
 
-  const shuffleAll = function () {
-    SpotifyApi.shuffleAll();
-
-    setInProgress(true);
-    setPercentComplete(0);
-    setPlayListDetails({ name: 'Play List', img: '' });
-    setMultipleStatus(undefined);
-    setArtists([]);
-
-    startProgressTimer();
-  };
-
   React.useEffect(() => {
     const fetchData = async () => {
       setHasLoaded(false);
@@ -144,7 +128,15 @@ export default function Playlists() {
 
   if (errMsg != '') {
     console.log('Errmsg: ' + errMsg);
-    return <Alert severity="error">{errMsg}</Alert>;
+
+    const page = '/logout';
+    console.log('Redirecting to : ' + page);
+    return (
+      <div>
+        <Alert severity="error">{errMsg}</Alert>
+        <Redirect to={page} />
+      </div>
+    );
   }
 
   if (!hasLoaded) {
