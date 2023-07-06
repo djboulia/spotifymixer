@@ -341,13 +341,13 @@ var PlayList = function (spotifyApi) {
     return new Promise(function (resolve, reject) {
       // Get the authenticated user
       // Get a user's playlists
-      console.log('calling reorder track with snapshot_id: ', snapshot_id);
+      // console.log('calling reorder track with snapshot_id: ', snapshot_id);
 
       const options = { range_length: 1, snapshot_id: snapshot_id };
       spotifyApi.reorderTracksInPlaylist(playListId, from, to, options).then(
         function (data) {
           // debug
-          console.log('new snapshot_id', data.body.snapshot_id);
+          // console.log('new snapshot_id', data.body.snapshot_id);
 
           // self.dumpTracks(playListId, from, to)
           //   .then(function (result) {

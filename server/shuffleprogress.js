@@ -120,7 +120,7 @@ var ShuffleProgress = function () {
        * @param {Number} total total number of tracks
        */
       const updateShuffleProgress = function (shuffled, total) {
-        console.log('updateShuffleProgress ' + shuffled);
+        // console.log('updateShuffleProgress ' + shuffled);
         self.setShuffled(shuffled);
       };
 

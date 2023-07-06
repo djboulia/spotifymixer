@@ -1,6 +1,34 @@
 var PlayList = require('./playlist');
 var TrackUtils = require('./trackutils');
 
+const LogLevel = {
+  ERROR: 1,
+  INFO: 2,
+  DEBUG: 3,
+};
+
+const logger = {
+  logLevel: LogLevel.ERROR, // change this to enable more logging output
+
+  error: function (...args) {
+    if (this.logLevel >= LogLevel.ERROR) {
+      console.log(...args);
+    }
+  },
+
+  info: function (...args) {
+    if (this.logLevel >= LogLevel.INFO) {
+      console.log(...args);
+    }
+  },
+
+  debug: function (...args) {
+    if (this.logLevel >= LogLevel.DEBUG) {
+      console.log(...args);
+    }
+  },
+};
+
 /**
  * This class implements the shuffle algorithm.  It sorts by artist first,
  * randomizes the songs for that artist, then lays out the tracks roughly
@@ -38,7 +66,7 @@ var Mixer = function (spotifyApi) {
 
     for (prop in stats) {
       if (stats[prop].length > 1) {
-        console.log('artist ' + prop + ' has ' + stats[prop].length + ' songs');
+        logger.info('artist ' + prop + ' has ' + stats[prop].length + ' songs');
         arrayStats.push({
           artist: prop,
           tracks: stats[prop],
@@ -96,7 +124,7 @@ var Mixer = function (spotifyApi) {
    */
   var placeInFrame = function (list, start, frameSize, track, rando) {
     // first try to pick a random number in the back half of the frame
-    console.log('start ' + start + ', frameSize ' + frameSize + ', rando ' + rando);
+    logger.info('start ' + start + ', frameSize ' + frameSize + ', rando ' + rando);
 
     // walk back from this number to the start of the frame to find
     // first available slot
@@ -122,7 +150,7 @@ var Mixer = function (spotifyApi) {
     // now go look for an open spot to delete
     for (let i = 0; i < list.length; i++) {
       if (!list[i]) {
-        console.log('Inserting at ' + rando + ' and removing at ' + i + ' ', track.track.name);
+        logger.debug('Inserting at ' + rando + ' and removing at ' + i + ' ', track.track.name);
 
         list.splice(i, 1);
         return list;
@@ -222,7 +250,7 @@ var Mixer = function (spotifyApi) {
    */
   this.getMixedTrackList = function (playListId) {
     const self = this;
-    console.log('mixtracks snapshot_id = ' + self.snapshot_id);
+    logger.debug('mixtracks snapshot_id = ' + self.snapshot_id);
 
     return new Promise(function (resolve, reject) {
       const playList = new PlayList(spotifyApi);
@@ -231,7 +259,7 @@ var Mixer = function (spotifyApi) {
         function (result) {
           // save the snapshot state for this playList to avoid concurrent
           // update issues
-          console.log(
+          logger.debug(
             'mixer.getTracks playListId ' + playListId + ' snapshot_id : ' + result.snapshot_id,
           );
           self.snapshot_id = result.snapshot_id;
@@ -239,19 +267,22 @@ var Mixer = function (spotifyApi) {
 
           const stats = {};
 
-          console.log('Found  ' + tracks.length + ' tracks in playlist');
+          logger.info('Found  ' + tracks.length + ' tracks in playlist');
           for (let i = 0; i < tracks.length; i++) {
             const track = tracks[i];
 
-            // console.log('Retrieved track name:', track.track.name);
-            // console.log('Retrieved track artist:', track.track.artists);
+            // logger.info('Retrieved track name:', track.track.name);
+            // logger.info('Retrieved track artist:', track.track.artists);
 
             const artists = track.track.artists;
             if (artists.length > 1) {
-              console.log('Warning: more than one artist in the list! ', artists);
+              logger.error(
+                'Warning: more than one artist in this track. Using first one in this list: ',
+                artists,
+              );
             }
             const artist = artists[0].name;
-            // console.log('Found artist name:', artist);
+            // logger.info('Found artist name:', artist);
 
             const tracklist = stats[artist] ? stats[artist] : [];
             tracklist.push(track);
@@ -259,16 +290,16 @@ var Mixer = function (spotifyApi) {
             stats[artist] = tracklist;
           }
 
-          console.log('Found total of ' + tracks.length + ' tracks');
+          logger.info('Found total of ' + tracks.length + ' tracks');
 
           const sortedStats = sortStats(stats);
 
-          // console.log("sorted stats: ", sortedStats);
+          // logger.info("sorted stats: ", sortedStats);
 
           const mixList = buildPlaylist(sortedStats);
           TrackUtils.printTracks(mixList);
 
-          console.log('Original track list: ');
+          logger.info('Original track list: ');
           TrackUtils.printTracks(tracks);
 
           // summarize the sorted stats and return those
@@ -288,7 +319,7 @@ var Mixer = function (spotifyApi) {
           });
         },
         function (err) {
-          console.log('Something went wrong!', err);
+          logger.error('Something went wrong!', err);
           reject(err);
         },
       );
@@ -302,11 +333,11 @@ var Mixer = function (spotifyApi) {
       } else {
         // process the current track
         const track = to[i];
-        console.log('Position ' + i + '. Placing track ' + track.track.name);
+        logger.debug('Position ' + i + '. Placing track ' + track.track.name);
 
         // find this track in the from list
         const index = TrackUtils.findTrackIndex(track, from);
-        console.log('Found track ' + track.track.name + ' at ' + index);
+        logger.debug('Found track ' + track.track.name + ' at ' + index);
 
         if (progressCallback) {
           // if supplied, call the callback function to update progress
@@ -314,7 +345,10 @@ var Mixer = function (spotifyApi) {
         }
 
         if (index === i) {
-          console.log('Got lucky! track already in order.  No action required. ', track.track.name);
+          logger.debug(
+            'Got lucky! track already in order.  No action required. ',
+            track.track.name,
+          );
 
           // process the next one
           reorderNextTrack(playListId, from, to, snapshot_id, i + 1, progressCallback).then(
@@ -335,7 +369,7 @@ var Mixer = function (spotifyApi) {
 
               // update the local from array to match
               TrackUtils.moveTrack(from, index, i);
-              console.log('Moved track at ' + index + ' to before ' + i);
+              logger.debug('Moved track at ' + index + ' to before ' + i);
 
               // process the next one
               reorderNextTrack(playListId, from, to, snapshot_id, i + 1, progressCallback).then(
@@ -352,7 +386,7 @@ var Mixer = function (spotifyApi) {
             },
           );
         } else {
-          console.log("Error: couldn't find track!");
+          logger.error("Error: couldn't find track!");
           reject("Couldn't find track!");
         }
       }
@@ -372,7 +406,7 @@ var Mixer = function (spotifyApi) {
     return new Promise(function (resolve, reject) {
       reorderNextTrack(playListId, from, to, snapshot_id, 0, progressCallback).then(
         function (result) {
-          console.log('Final re-ordered track list: ');
+          logger.info('Final re-ordered track list: ');
           TrackUtils.printTracks(from);
 
           resolve(result);
