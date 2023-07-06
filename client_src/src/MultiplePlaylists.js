@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   seeMore: {
     marginTop: theme.spacing(3),
   },
-  shuffleAll: {
+  shuffleSelected: {
     width: 250,
     marginBottom: 20,
     marginRight: 10,
@@ -185,7 +185,7 @@ export default function Playlists() {
           onClick={() => {
             shuffleMultiple();
           }}
-          className={classes.shuffleAll}
+          className={classes.shuffleSelected}
           disabled={inProgress || nothingSelected()}
           variant="contained"
           color="primary"
