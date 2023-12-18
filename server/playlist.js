@@ -338,6 +338,8 @@ var PlayList = function (spotifyApi) {
   this.reorderTrack = function (playListId, from, to, snapshot_id) {
     const self = this;
 
+    console.log(`reorderTrack:  ${playListId} ${from} -> ${to} with snapshot_id: ${snapshot_id} `);
+
     return new Promise(function (resolve, reject) {
       // Get the authenticated user
       // Get a user's playlists

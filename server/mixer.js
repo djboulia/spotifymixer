@@ -1,33 +1,6 @@
-var PlayList = require('./playlist');
-var TrackUtils = require('./trackutils');
-
-const LogLevel = {
-  ERROR: 1,
-  INFO: 2,
-  DEBUG: 3,
-};
-
-const logger = {
-  logLevel: LogLevel.ERROR, // change this to enable more logging output
-
-  error: function (...args) {
-    if (this.logLevel >= LogLevel.ERROR) {
-      console.log(...args);
-    }
-  },
-
-  info: function (...args) {
-    if (this.logLevel >= LogLevel.INFO) {
-      console.log(...args);
-    }
-  },
-
-  debug: function (...args) {
-    if (this.logLevel >= LogLevel.DEBUG) {
-      console.log(...args);
-    }
-  },
-};
+const PlayList = require('./playlist');
+const TrackUtils = require('./trackutils');
+const logger = require('./logger');
 
 /**
  * This class implements the shuffle algorithm.  It sorts by artist first,
@@ -38,7 +11,7 @@ const logger = {
  *
  * @param {Object} spotifyApi a configured SpotifyApi with a valid access token
  */
-var Mixer = function (spotifyApi) {
+const Mixer = function (spotifyApi) {
   this.snapshot_id = null;
 
   this.getPlayListDetails = function (playListId) {
@@ -248,174 +221,160 @@ var Mixer = function (spotifyApi) {
    *
    * @param {Array} tracks array of tracks objects
    */
-  this.getMixedTrackList = function (playListId) {
+  this.getMixedTrackList = async function (playListId) {
     const self = this;
     logger.debug('mixtracks snapshot_id = ' + self.snapshot_id);
 
-    return new Promise(function (resolve, reject) {
-      const playList = new PlayList(spotifyApi);
+    const playList = new PlayList(spotifyApi);
 
-      playList.getTracks(playListId).then(
-        function (result) {
-          // save the snapshot state for this playList to avoid concurrent
-          // update issues
-          logger.debug(
-            'mixer.getTracks playListId ' + playListId + ' snapshot_id : ' + result.snapshot_id,
-          );
-          self.snapshot_id = result.snapshot_id;
-          const tracks = result.tracks;
-
-          const stats = {};
-
-          logger.info('Found  ' + tracks.length + ' tracks in playlist');
-          for (let i = 0; i < tracks.length; i++) {
-            const track = tracks[i];
-
-            // logger.info('Retrieved track name:', track.track.name);
-            // logger.info('Retrieved track artist:', track.track.artists);
-
-            const artists = track.track.artists;
-            if (artists.length > 1) {
-              logger.error(
-                'Warning: more than one artist in this track. Using first one in this list: ',
-                artists,
-              );
-            }
-            const artist = artists[0].name;
-            // logger.info('Found artist name:', artist);
-
-            const tracklist = stats[artist] ? stats[artist] : [];
-            tracklist.push(track);
-
-            stats[artist] = tracklist;
-          }
-
-          logger.info('Found total of ' + tracks.length + ' tracks');
-
-          const sortedStats = sortStats(stats);
-
-          // logger.info("sorted stats: ", sortedStats);
-
-          const mixList = buildPlaylist(sortedStats);
-          TrackUtils.printTracks(mixList);
-
-          logger.info('Original track list: ');
-          TrackUtils.printTracks(tracks);
-
-          // summarize the sorted stats and return those
-          const artistStats = [];
-          for (let i = 0; i < sortedStats.length; i++) {
-            const stat = sortedStats[i];
-            artistStats.push({
-              artist: stat.artist,
-              length: stat.tracks.length,
-            });
-          }
-
-          resolve({
-            before: tracks,
-            after: mixList,
-            artists: artistStats,
-          });
-        },
-        function (err) {
-          logger.error('Something went wrong!', err);
-          reject(err);
-        },
-      );
+    const trackList = await playList.getTracks(playListId).catch((err) => {
+      throw err;
     });
+
+    // save the snapshot state for this playList to avoid concurrent update issues
+    logger.debug(`mixer.getTracks playListId ${playListId} snapshot_id : ${trackList.snapshot_id}`);
+    self.snapshot_id = trackList.snapshot_id;
+    const tracks = trackList.tracks;
+
+    const stats = {};
+
+    logger.info('Found  ' + tracks.length + ' tracks in playlist');
+    for (let i = 0; i < tracks.length; i++) {
+      const track = tracks[i];
+
+      // logger.info('Retrieved track name:', track.track.name);
+      // logger.info('Retrieved track artist:', track.track.artists);
+
+      const artists = track.track.artists;
+      if (artists.length > 1) {
+        logger.error(
+          'Warning: more than one artist in this track. Using first one in this list: ',
+          artists,
+        );
+      }
+      const artist = artists[0].name;
+      // logger.info('Found artist name:', artist);
+
+      const tracklist = stats[artist] ? stats[artist] : [];
+      tracklist.push(track);
+
+      stats[artist] = tracklist;
+    }
+
+    logger.info('Found total of ' + tracks.length + ' tracks');
+
+    const sortedStats = sortStats(stats);
+
+    // logger.info("sorted stats: ", sortedStats);
+
+    const mixList = buildPlaylist(sortedStats);
+    TrackUtils.printTracks(mixList);
+
+    logger.info('Original track list: ');
+    TrackUtils.printTracks(tracks);
+
+    // summarize the sorted stats and return those
+    const artistStats = [];
+    for (let i = 0; i < sortedStats.length; i++) {
+      const stat = sortedStats[i];
+      artistStats.push({
+        artist: stat.artist,
+        length: stat.tracks.length,
+      });
+    }
+
+    return {
+      before: tracks,
+      after: mixList,
+      artists: artistStats,
+    };
   };
 
-  var reorderNextTrack = function (playListId, from, to, snapshot_id, i, progressCallback) {
-    return new Promise(function (resolve, reject) {
-      if (i >= to.length) {
-        resolve(to);
-      } else {
-        // process the current track
-        const track = to[i];
-        logger.debug('Position ' + i + '. Placing track ' + track.track.name);
+  /**
+   * reorder a track in the playlist
+   *
+   * @param {String} playListId spotify id for this playlist
+   * @param {String} snapshotId returned from each call to Spotify; keeps in sync with spotify api
+   * @param {Array} fromPlaylist starting playlist track order
+   * @param {Array} toPlaylist desired playlist track order
+   * @param {Number} trackIndex index of track in the toPlaylist to reorder
+   * @returns snapshot_id this keeps calls to spotify api in sync
+   */
+  const reorderTrack = async function (
+    playListId,
+    snapshot_id,
+    fromPlaylist,
+    toPlaylist,
+    trackIndex,
+  ) {
+    if (trackIndex < 0 || trackIndex >= toPlaylist.length) {
+      throw new Error('trackIndex out of range');
+    }
 
-        // find this track in the from list
-        const index = TrackUtils.findTrackIndex(track, from);
-        logger.debug('Found track ' + track.track.name + ' at ' + index);
+    // process the current track
+    const track = toPlaylist[trackIndex];
+    logger.debug('Position ' + trackIndex + '. Placing track ' + track.track.name);
 
-        if (progressCallback) {
-          // if supplied, call the callback function to update progress
-          progressCallback(i + 1, to.length);
-        }
+    // find this track in the from list
+    const index = TrackUtils.findTrackIndex(track, fromPlaylist);
+    logger.debug('Found track ' + track.track.name + ' at ' + index);
 
-        if (index === i) {
-          logger.debug(
-            'Got lucky! track already in order.  No action required. ',
-            track.track.name,
-          );
+    if (index < 0 || index >= fromPlaylist.length) {
+      logger.error("Error: couldn't find track!");
+      throw new Error("Couldn't find track!");
+    }
 
-          // process the next one
-          reorderNextTrack(playListId, from, to, snapshot_id, i + 1, progressCallback).then(
-            function (result) {
-              resolve(to);
-            },
-            function (err) {
-              reject(err);
-            },
-          );
-        } else if (index >= 0 && index < from.length) {
-          // do the move of the track to its new position
-          const playList = new PlayList(spotifyApi);
+    if (index !== trackIndex) {
+      // do the move of the track to its new position
+      const playList = new PlayList(spotifyApi);
 
-          playList.reorderTrack(playListId, index, i, snapshot_id).then(
-            function (body) {
-              snapshot_id = body.snapshot_id;
+      const body = await playList
+        .reorderTrack(playListId, index, trackIndex, snapshot_id)
+        .catch((err) => {
+          throw err;
+        });
 
-              // update the local from array to match
-              TrackUtils.moveTrack(from, index, i);
-              logger.debug('Moved track at ' + index + ' to before ' + i);
+      // store the returned snapshot_id for the next call
+      snapshot_id = body.snapshot_id;
 
-              // process the next one
-              reorderNextTrack(playListId, from, to, snapshot_id, i + 1, progressCallback).then(
-                function (result) {
-                  resolve(to);
-                },
-                function (err) {
-                  reject(err);
-                },
-              );
-            },
-            function (err) {
-              reject(err);
-            },
-          );
-        } else {
-          logger.error("Error: couldn't find track!");
-          reject("Couldn't find track!");
-        }
-      }
-    });
+      // update the local from array to match
+      TrackUtils.moveTrack(fromPlaylist, index, trackIndex);
+      logger.debug('Moved track at ' + index + ' to before ' + trackIndex);
+    } else {
+      logger.debug('Got lucky! track already in order.  No action required. ', track.track.name);
+    }
+
+    return snapshot_id;
   };
 
   /**
    * reorder the play list
    *
    * @param {String} playListId
-   * @param {Array} from original play list order
-   * @param {Array} to new playlist order
+   * @param {Array} fromPlaylist original play list order
+   * @param {Array} toPlaylist new playlist order
+   * @param {Function} progressCallback (optional) callback function to update progress
    */
-  this.reorderPlaylist = function (playListId, from, to, progressCallback) {
-    const snapshot_id = this.snapshot_id;
+  this.reorderPlaylist = async function (playListId, fromPlaylist, toPlaylist, progressCallback) {
+    for (let i = 0; i < toPlaylist.length; i++) {
+      this.snapshot_id = await reorderTrack(
+        playListId,
+        this.snapshot_id,
+        fromPlaylist,
+        toPlaylist,
+        i,
+      ).catch((err) => {
+        throw err;
+      });
 
-    return new Promise(function (resolve, reject) {
-      reorderNextTrack(playListId, from, to, snapshot_id, 0, progressCallback).then(
-        function (result) {
-          logger.info('Final re-ordered track list: ');
-          TrackUtils.printTracks(from);
+      if (progressCallback) {
+        // if supplied, call the callback function to update progress
+        progressCallback(i + 1, toPlaylist.length);
+      }
+    }
 
-          resolve(result);
-        },
-        function (err) {
-          reject(err);
-        },
-      );
-    });
+    logger.info('Final re-ordered track list: ');
+    TrackUtils.printTracks(fromPlaylist);
   };
 };
 
