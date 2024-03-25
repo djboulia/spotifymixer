@@ -40,7 +40,7 @@ var ServerApi = function (server) {
       list.push({
         id: item.id,
         name: item.name,
-        img: item.images.length > 0 ? item.images[0].url : '',
+        img: item.images?.length > 0 ? item.images[0].url : '',
         total: item.tracks.total,
       });
     }
