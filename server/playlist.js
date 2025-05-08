@@ -10,45 +10,49 @@ var TrackUtils = require('./trackutils');
 var PlayList = function (spotifyApi) {
   const RETRY_DELAY = 10; // number of milliseconds beteween retries
 
-  this.getOwnedPlayLists = function () {
-    return new Promise(function (resolve, reject) {
-      // Get the authenticated user
-      spotifyApi.getMe().then(
-        function (data) {
-          const me = data.body;
-          console.log('Found user', me.display_name);
-
-          // Get a user's playlists
-          spotifyApi.getUserPlaylists({ limit: 50 }).then(
-            function (data) {
-              // console.log('Retrieved playlists', data.body);
-
-              const ownedItems = [];
-              const allItems = data.body.items;
-
-              for (let i = 0; i < allItems.length; i++) {
-                const item = allItems[i];
-                if (item.owner.id === me.id) {
-                  ownedItems.push(item);
-                } else {
-                  console.log('skipping unowned playlist ', item.name);
-                }
-              }
-
-              resolve(ownedItems);
-            },
-            function (err) {
-              console.log('Something went wrong!', err);
-              reject(err);
-            },
-          );
-        },
-        function (err) {
-          console.log('Something went wrong!', err);
-          reject(err);
-        },
-      );
+  this.getOwnedPlayLists = async () => {
+    const dataMe = await spotifyApi.getMe().catch((err) => {
+      console.error('Unable to get user information!', err);
+      throw err;
     });
+    const me = dataMe.body;
+    console.log('Found user', me.display_name);
+
+    const ownedItems = [];
+    let offset = 0;
+    const limit = 50;
+    let done = false;
+
+    while (!done) {
+      const dataPlaylist = await spotifyApi.getUserPlaylists({ offset, limit }).catch((err) => {
+        console.error('Unable to get get playlists!', err);
+        throw err;
+      });
+
+      const playlist = dataPlaylist.body;
+      const allItems = playlist.items;
+
+      for (let i = 0; i < allItems.length; i++) {
+        const item = allItems[i];
+        if (item.owner.id === me.id) {
+          ownedItems.push(item);
+        } else {
+          console.log('skipping unowned playlist ', item.name);
+        }
+      }
+
+      console.log('Total playlists: ', playlist.total);
+      if (playlist.total > offset + limit) {
+        offset += limit;
+        console.log('Retrieving next chunk of playlists at offset ' + offset);
+      } else {
+        console.log('No more playlists to retrieve');
+        done = true;
+      }
+    }
+
+    console.log('Found ' + ownedItems.length + ' owned playlists');
+    return ownedItems;
   };
 
   /**
