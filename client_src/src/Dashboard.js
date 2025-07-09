@@ -164,9 +164,7 @@ export default function Dashboard(props) {
           <Grid container spacing={3}>
             {/* Play lists */}
             <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                {props.children}
-              </Paper>
+              <Paper className={classes.paper}>{props.children}</Paper>
             </Grid>
           </Grid>
           <Box pt={4}>

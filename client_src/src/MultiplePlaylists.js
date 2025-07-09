@@ -24,7 +24,36 @@ const useStyles = makeStyles((theme) => ({
   shuffleSelected: {
     width: 250,
     marginBottom: 20,
-    marginRight: 10,
+  },
+  stickyHeader: {
+    position: 'absolute',
+    paddingRight: 50,
+    width: '100%',
+    maxWidth: 1280,
+    zIndex: 1000,
+    top: 56,
+    [theme.breakpoints.up('sm')]: {
+      top: 64,
+    },
+  },
+  header: {
+    display: 'flex',
+    flexDirection: 'column',
+    [theme.breakpoints.up('sm')]: {
+      flexDirection: 'row',
+    },
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 20,
+  },
+  contentArea: {
+    zIndex: 1,
+    marginTop: 120,
+    [theme.breakpoints.up('sm')]: {
+      marginTop: 40,
+    },
+    marginBottom: 20,
   },
 }));
 
@@ -187,57 +216,60 @@ export default function Playlists() {
     <Dashboard>
       {inProgress && progressIndicator}
 
-      <Title>Playlists for {name}</Title>
-
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button
-          onClick={() => {
-            shuffleMultiple();
-          }}
-          className={classes.shuffleSelected}
-          disabled={inProgress || nothingSelected()}
-          variant="contained"
-          color="primary"
-        >
-          Shuffle Selected
-        </Button>
+      <div className={classes.stickyHeader}>
+        <div className={classes.header}>
+          <Title>Playlists for {name}</Title>
+          <Button
+            onClick={() => {
+              shuffleMultiple();
+            }}
+            className={classes.shuffleSelected}
+            disabled={inProgress || nothingSelected()}
+            variant="contained"
+            color="primary"
+          >
+            Shuffle Selected
+          </Button>
+        </div>
       </div>
 
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Action</TableCell>
-            <TableCell></TableCell>
-            <TableCell>Playlist</TableCell>
-            <TableCell align="right">Songs</TableCell>
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {playlist.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>
-                <Checkbox
-                  onChange={() => {
-                    row.checked = !row.checked;
-                    console.log('checked: ' + row.checked);
-                    setPlaylist([...playlist]);
-                  }}
-                  disabled={inProgress}
-                  variant="contained"
-                  color="primary"
-                  checked={row.checked}
-                ></Checkbox>
-              </TableCell>
-              <TableCell>
-                <img width="40" src={row.img}></img>
-              </TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell align="right">{row.total}</TableCell>
+      <div className={classes.contentArea}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Shuffle</TableCell>
+              <TableCell></TableCell>
+              <TableCell>Playlist</TableCell>
+              <TableCell align="right">Songs</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+
+          <TableBody>
+            {playlist.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>
+                  <Checkbox
+                    onChange={() => {
+                      row.checked = !row.checked;
+                      console.log('checked: ' + row.checked);
+                      setPlaylist([...playlist]);
+                    }}
+                    disabled={inProgress}
+                    variant="contained"
+                    color="primary"
+                    checked={row.checked}
+                  ></Checkbox>
+                </TableCell>
+                <TableCell>
+                  <img width="40" src={row.img}></img>
+                </TableCell>
+                <TableCell>{row.name}</TableCell>
+                <TableCell align="right">{row.total}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </Dashboard>
   );
 }
