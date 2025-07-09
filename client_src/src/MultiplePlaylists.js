@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Playlists() {
+export default function MultiplePlaylists() {
   const classes = useStyles();
   const [hasLoaded, setHasLoaded] = React.useState(false);
   const [errMsg, setErrMsg] = React.useState('');
