@@ -14,7 +14,7 @@ const TrackSearch = function (spotifyApi) {
       .trim();
   };
 
-  const trackMatches = (track, _title, artist) => {
+  const artistMatches = (track, artist) => {
     trackArtist = normalizeString(track.artists[0].name);
     searchArtist = normalizeString(artist);
 
@@ -29,12 +29,57 @@ const TrackSearch = function (spotifyApi) {
     // lots of edge cases like "The Smashing Pumpkins" vs. "Smashing Pumpkins",
     // "The Jimi Hendrix Experience" vs. "Jimi Hendrix", ".38 Special" vs. "38 Special"
     // see if one of the artists is a substring of the other
-    console.log('fuzzy search: artist: ' + searchArtist, ' track artist: ' + trackArtist);
     if (trackArtist.includes(searchArtist) || searchArtist.includes(trackArtist)) {
+      console.log('fuzzy artist search:: ' + searchArtist, ' track artist: ' + trackArtist);
       return true;
     }
 
     return false;
+  };
+
+  // this was an attempt to get a better/more consistent track match from the spotify search
+  // it didn't work well, so I left it in as a reference
+  const titleMatches = (trackList, title) => {
+    let difference = 100;
+    let bestFitTrack = undefined;
+
+    if (trackList.length === 0) {
+      return undefined;
+    }
+
+    for (const track of trackList) {
+      const trackTitle = normalizeString(track.name);
+      const searchTitle = normalizeString(title);
+
+      // exact match wins, return immediately
+      if (trackTitle === searchTitle) {
+        return track;
+      } else {
+        // otherwise, scan all entries for a close match
+        if (trackTitle.includes(searchTitle) || searchTitle.includes(trackTitle)) {
+          // the track title is a substring of the search title or vice versa
+
+          // look for "remaster" in the track title and prefer that
+          if (trackTitle.includes('remaster') || trackTitle.includes('remastered')) {
+            bestFitTrack = track;
+            difference = 0; // best match, no difference
+          }
+
+          // return the track with the least difference in length as "best fit"
+          if (
+            bestFitTrack === undefined ||
+            Math.abs(trackTitle.length - searchTitle.length) < difference
+          ) {
+            bestFitTrack = track;
+            difference = Math.abs(trackTitle.length - searchTitle.length);
+          }
+        }
+      }
+    }
+
+    console.log('Fuzzy title match: ' + title, ' track: ' + bestFitTrack.name);
+    console.log('These were the title choices ', trackList.map((t) => t.name).join(', '));
+    return bestFitTrack;
   };
 
   /**
@@ -45,24 +90,34 @@ const TrackSearch = function (spotifyApi) {
    * @returns a track object or undefined if no match is found
    */
   this.findTrack = async (title, artist) => {
-    const query = `track=${title}&artist=${artist}`;
+    const query = `track:"${title}" artist:"${artist}"`;
     const options = { limit: 10 };
     const results = await spotifyApi.searchTracks(query, options);
-
     const tracks = results.body.tracks.items;
-    for (track of tracks) {
-      if (trackMatches(track, title, artist)) {
+
+    const artistTracks = [];
+
+    // the spotify search results don't seem to be deterministic,
+    // so sometimes we get different results for the same query
+    // we look for all artist matches first, then look at best match
+    // for the title
+
+    // build a list of tracks tha match the artist
+    for (const track of tracks) {
+      if (artistMatches(track, artist)) {
         // console.log(`Track matched: ${track.name} by ${track.artists[0].name}`);
-        return track;
-      } else {
-        console.log(
-          `Track not matched: expected ${title} got ${track.name}, expected ${artist} got ${track.artists[0].name}`,
-        );
+        artistTracks.push(track);
       }
     }
 
-    console.log(`No matches found for search ${title}, ${artist} tracks`, tracks);
-    return undefined;
+    if (artistTracks.length === 0) {
+      console.log(`No artist matches found for search ${title}, ${artist} tracks`, tracks);
+      return undefined;
+    }
+
+    // see comment above
+    // return titleMatches(artistTracks, title) || artistTracks[0];
+    return artistTracks[0];
   };
 };
 
