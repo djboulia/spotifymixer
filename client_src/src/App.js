@@ -1,13 +1,13 @@
-import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 
-import About from './About';
-import Playlists from './Playlists';
-import MultiplePlaylists from './MultiplePlaylists';
-import Login from './Login';
-import PostLogin from './PostLogin';
-import Logout from './Logout';
-import SpotifyApi from './SpotifyApi';
+import SpotifyApi from './lib/SpotifyApi';
+import About from './components/About';
+import Playlists from './components/Playlists';
+import MultiplePlaylists from './components/MultiplePlaylists';
+import Login from './components/Login';
+import PostLogin from './components/PostLogin';
+import Logout from './components/Logout';
+import RadioSync from './components/RadioSync';
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -40,6 +40,7 @@ export default function App() {
         <PrivateRoute exact path="/logout" component={Logout} />
         <PrivateRoute exact path="/main" component={Playlists} />
         <PrivateRoute exact path="/multiple" component={MultiplePlaylists} />
+        <PrivateRoute exact path="/radioSync" component={RadioSync} />
         <PrivateRoute exact path="/about" component={About} />
         <Route exact path="/" component={Login} />
       </Switch>

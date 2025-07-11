@@ -44,8 +44,8 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
       // the user.  This will finish the authorization and give us a Spotify
       // access token to be used in subsequent Spotify API calls
 
-      var code = context.query.code || null;
-      var state = context.query.state || null;
+      const state = context.query.state || null;
+      const code = context.query.code || null;
 
       if (!spotifyApi.isValidAuthState(context.session, state)) {
         const params = new URLSearchParams({
@@ -54,14 +54,14 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
 
         console.log('params: ' + params);
         return server.redirect('/#' + params);
-      } else {
-        await spotifyApi.getAccessToken(context.session, code).catch((err) => {
-          return server.redirect(client_url + '/logout');
-        });
-
-        console.log('redirecting to postLogin');
-        return server.redirect(client_url + '/postLogin');
       }
+
+      await spotifyApi.getAccessToken(context.session, code).catch((err) => {
+        return server.redirect(client_url + '/logout');
+      });
+
+      console.log('redirecting to postLogin');
+      return server.redirect(client_url + '/postLogin');
     }
 
     async function logout(context) {
@@ -80,6 +80,9 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
     // console.log('spotify auth check');
 
     if (!spotifyApi.isAuthenticated(context.session)) {
+      // good for testing purposes
+      // try getting a stored token from a.prior session
+      // if (!spotifyApi.setStoredToken(context.session))
       throw server.serverError(401, 'Please authenticate with the Spotify API first');
     }
 

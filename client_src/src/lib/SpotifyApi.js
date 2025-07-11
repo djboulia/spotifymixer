@@ -113,6 +113,23 @@ const SpotifyApi = {
     });
   },
 
+  radioSync(stationId, playListId) {
+    return new Promise((resolve, reject) => {
+      return axios
+        .get(`/api/spotify/radioSync?stationId=${stationId}&playListId=${playListId}`)
+        .then((res) => {
+          console.log(res);
+
+          resolve(res.data);
+        })
+        .catch((e) => {
+          console.log('error: ' + JSON.stringify(e.response));
+
+          reject('error');
+        });
+    });
+  },
+
   shuffle(id) {
     return new Promise((resolve, reject) => {
       return axios

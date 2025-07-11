@@ -22,6 +22,13 @@ export const mainListItems = (
       <ListItemText primary="Shuffle Multiple" />
     </ListItem>
 
+    <ListItem button component="a" href="/radioSync">
+      <ListItemIcon>
+        <DashboardIcon />
+      </ListItemIcon>
+      <ListItemText primary="Sync Radio Station" />
+    </ListItem>
+
     <ListItem button component="a" href="/logout">
       <ListItemIcon>
         <LayersIcon />

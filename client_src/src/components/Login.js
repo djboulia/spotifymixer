@@ -1,7 +1,6 @@
-import React from 'react';
 import Dashboard from './Dashboard';
 import Title from './Title';
-import SpotifyApi from './SpotifyApi';
+import SpotifyApi from '../lib/SpotifyApi';
 
 export default function Login(props) {
   const link = SpotifyApi.getLoginUrl();
@@ -10,7 +9,9 @@ export default function Login(props) {
     <Dashboard>
       <Title>Login</Title>
 
-      <p>Please <a href={link}>login to Spotify</a></p>
+      <p>
+        Please <a href={link}>login to Spotify</a>
+      </p>
     </Dashboard>
-  )
+  );
 }

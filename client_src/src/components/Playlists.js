@@ -11,7 +11,7 @@ import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
 import Title from './Title';
 import Dashboard from './Dashboard';
-import SpotifyApi from './SpotifyApi';
+import SpotifyApi from '../lib/SpotifyApi';
 import ProgressModal from './PlaylistProgressModal';
 
 // Generate Playlist Data

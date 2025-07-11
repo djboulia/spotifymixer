@@ -2,8 +2,10 @@ var request = require('request'); // "Request" library
 
 var SpotifyWebApi = require('spotify-web-api-node');
 var SpotifyAuthState = require('./spotifyauthstate');
+const fs = require('fs');
 
 const SPOTIFY_URL = 'https://accounts.spotify.com';
+const TOKEN_FILE = './spotify_tokens.json';
 
 /**
  *
@@ -113,8 +115,41 @@ var SpotifyApi = function (spotifyConfig, redirectUri) {
 
     session.access_token = access_token;
     session.refresh_token = refresh_token;
-    session.expires_in = expires_in;
     session.expires_at = Date.now() + expires_in * 1000;
+
+    // store the credentials in a file for next time
+    fs.writeFileSync(
+      TOKEN_FILE,
+      JSON.stringify(
+        {
+          access_token: access_token,
+          refresh_token: refresh_token,
+          expires_in: expires_in,
+          expires_at: session.expires_at,
+        },
+        null,
+        2,
+      ),
+    );
+  };
+
+  // look for previously stored auth info and add to the session
+  this.setStoredToken = function (session) {
+    // read the token from the file
+    try {
+      const data = fs.readFileSync(TOKEN_FILE, 'utf8');
+      const token = JSON.parse(data);
+
+      console.log('setting context with stored token: ', token);
+      session.access_token = token.access_token;
+      session.refresh_token = token.refresh_token;
+      session.expires_at = token.expires_at;
+
+      return true;
+    } catch (err) {
+      console.error('Error reading token file:', err);
+      return false;
+    }
   };
 
   /**

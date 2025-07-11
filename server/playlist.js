@@ -52,6 +52,7 @@ var PlayList = function (spotifyApi) {
     }
 
     console.log('Found ' + ownedItems.length + ' owned playlists');
+    // console.log('Owned playlists: ', JSON.stringify(ownedItems, null, 2));
     return ownedItems;
   };
 
@@ -402,6 +403,16 @@ var PlayList = function (spotifyApi) {
         },
       );
     });
+  };
+
+  /**
+   *
+   * @param {string} playListId
+   * @param {string[]} tracks an array of track URIs to add to the playlist
+   */
+  this.addTracks = async function (playListId, tracks) {
+    await spotifyApi.addTracksToPlaylist(playListId, tracks);
+    console.log('Added tracks to playlist ' + playListId);
   };
 };
 

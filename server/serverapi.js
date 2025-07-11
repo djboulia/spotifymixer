@@ -7,6 +7,7 @@
 const PlayList = require('./playlist');
 const ShuffleState = require('./shufflestate');
 const SpotifySession = require('./spotifysession');
+const RadioSync = require('./radiosync');
 
 var ServerApi = function (server) {
   // hold our shuffle state for each session
@@ -59,6 +60,20 @@ var ServerApi = function (server) {
     }
 
     return shuffleProgress.status();
+  }
+
+  // sync the tracks from an iheartradio station to a spotify playlist
+  // tracks already in the playlist will be skipped
+  async function spotifyRadioSync(spotifyApi, context) {
+    const query = context.query;
+
+    const stationId = query.stationId || null;
+    const playListId = query.playListId || null;
+
+    const radioSync = new RadioSync(spotifyApi);
+    const results = await radioSync.sync(stationId, playListId);
+
+    return results;
   }
 
   async function spotifyShuffle(spotifyApi, context) {
@@ -130,6 +145,7 @@ var ServerApi = function (server) {
     spotifySession.addApi('/api/spotify/me', spotifyMe);
     spotifySession.addApi('/api/spotify/playlists', spotifyPlaylists);
     spotifySession.addApi('/api/spotify/progress', spotifyProgress);
+    spotifySession.addApi('/api/spotify/radioSync', spotifyRadioSync);
     spotifySession.addApi('/api/spotify/shuffle', spotifyShuffle);
     spotifySession.addApi('/api/spotify/shuffleMultiple', spotifyShuffleMultiple);
   };
