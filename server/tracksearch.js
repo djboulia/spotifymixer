@@ -14,7 +14,7 @@ const TrackSearch = function (spotifyApi) {
       .trim();
   };
 
-  const artistMatches = (track, artist) => {
+  const artistExactMatch = (track, artist) => {
     trackArtist = normalizeString(track.artists[0].name);
     searchArtist = normalizeString(artist);
 
@@ -26,11 +26,17 @@ const TrackSearch = function (spotifyApi) {
       return true;
     }
 
+    return false;
+  };
+
+  const artistFuzzyMatch = (track, artist) => {
+    trackArtist = normalizeString(track.artists[0].name);
+    searchArtist = normalizeString(artist);
+
     // lots of edge cases like "The Smashing Pumpkins" vs. "Smashing Pumpkins",
     // "The Jimi Hendrix Experience" vs. "Jimi Hendrix", ".38 Special" vs. "38 Special"
     // see if one of the artists is a substring of the other
     if (trackArtist.includes(searchArtist) || searchArtist.includes(trackArtist)) {
-      console.log('fuzzy artist search:: ' + searchArtist, ' track artist: ' + trackArtist);
       return true;
     }
 
@@ -82,18 +88,43 @@ const TrackSearch = function (spotifyApi) {
     return bestFitTrack;
   };
 
+  const searchSpotify = async (title, artist, albumName) => {
+    const query =
+      `track:"${title}" artist:"${artist}"` + (albumName ? ` album:"${albumName}"` : '');
+    const options = { limit: 10 };
+
+    const results = await spotifyApi.searchTracks(query, options);
+    const tracks = results.body.tracks.items;
+    return tracks;
+  };
+
+  const searchTracks = async (title, artist, albumName) => {
+    const tracks = await searchSpotify(title, artist, albumName);
+    if (tracks.length > 0) {
+      return tracks;
+    }
+
+    // chop off the text in parentheses
+    const titleWithoutParentheses = title.replace(/\s*\(.*?\)\s*$/, '');
+    console.log(
+      `No tracks found for search ${title}, ${artist}, changing title to ${titleWithoutParentheses}`,
+    );
+
+    const tracksNoParens = await searchSpotify(titleWithoutParentheses, artist, albumName);
+
+    return tracksNoParens;
+  };
+
   /**
    * return a single spotify track that best matches the provided title and artist
    *
    * @param {string} title
    * @param {string} artist
+   * @param {string} albumName optional
    * @returns a track object or undefined if no match is found
    */
-  this.findTrack = async (title, artist) => {
-    const query = `track:"${title}" artist:"${artist}"`;
-    const options = { limit: 10 };
-    const results = await spotifyApi.searchTracks(query, options);
-    const tracks = results.body.tracks.items;
+  this.findTrack = async (title, artist, albumName = undefined) => {
+    const tracks = await searchTracks(title, artist, albumName);
 
     const artistTracks = [];
 
@@ -104,9 +135,23 @@ const TrackSearch = function (spotifyApi) {
 
     // build a list of tracks tha match the artist
     for (const track of tracks) {
-      if (artistMatches(track, artist)) {
+      if (artistExactMatch(track, artist)) {
         // console.log(`Track matched: ${track.name} by ${track.artists[0].name}`);
         artistTracks.push(track);
+      } else {
+        if (artistFuzzyMatch(track, artist)) {
+          // console.log(`Fuzzy track match: ${track.name} by ${track.artists[0].name}`);
+          // see if we have any prior exact matches
+
+          const priorExactMatch = artistTracks.find((t) => artistExactMatch(t, artist));
+          if (!priorExactMatch) {
+            console.log(
+              `no exact match found for ${artist}  adding fuzzy match`,
+              track.artists[0].name,
+            );
+            artistTracks.push(track);
+          }
+        }
       }
     }
 
