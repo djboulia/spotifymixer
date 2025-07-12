@@ -45,8 +45,7 @@ const TrackSearch = function (spotifyApi) {
 
   // this was an attempt to get a better/more consistent track match from the spotify search
   // it didn't work well, so I left it in as a reference
-  const titleMatches = (trackList, title) => {
-    let difference = 100;
+  const titleExactMatch = (trackList, title) => {
     let bestFitTrack = undefined;
 
     if (trackList.length === 0) {
@@ -60,32 +59,10 @@ const TrackSearch = function (spotifyApi) {
       // exact match wins, return immediately
       if (trackTitle === searchTitle) {
         return track;
-      } else {
-        // otherwise, scan all entries for a close match
-        if (trackTitle.includes(searchTitle) || searchTitle.includes(trackTitle)) {
-          // the track title is a substring of the search title or vice versa
-
-          // look for "remaster" in the track title and prefer that
-          if (trackTitle.includes('remaster') || trackTitle.includes('remastered')) {
-            bestFitTrack = track;
-            difference = 0; // best match, no difference
-          }
-
-          // return the track with the least difference in length as "best fit"
-          if (
-            bestFitTrack === undefined ||
-            Math.abs(trackTitle.length - searchTitle.length) < difference
-          ) {
-            bestFitTrack = track;
-            difference = Math.abs(trackTitle.length - searchTitle.length);
-          }
-        }
       }
     }
 
-    console.log('Fuzzy title match: ' + title, ' track: ' + bestFitTrack.name);
-    console.log('These were the title choices ', trackList.map((t) => t.name).join(', '));
-    return bestFitTrack;
+    return undefined;
   };
 
   const searchSpotify = async (title, artist, albumName) => {
@@ -156,12 +133,21 @@ const TrackSearch = function (spotifyApi) {
     }
 
     if (artistTracks.length === 0) {
-      console.log(`No artist matches found for search ${title}, ${artist} tracks`, tracks);
-      return undefined;
+      console.log(
+        `No artist matches found for search ${title}, ${artist} tracks`,
+        JSON.stringify(tracks, null, 2),
+      );
+
+      // try to match by title
+      const track = titleExactMatch(tracks, title);
+      if (track) {
+        console.log(
+          `No artist, but found track by title: ${track.name} by ${track.artists[0].name}`,
+        );
+      }
+      return track;
     }
 
-    // see comment above
-    // return titleMatches(artistTracks, title) || artistTracks[0];
     return artistTracks[0];
   };
 };

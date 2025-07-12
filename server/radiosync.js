@@ -8,14 +8,23 @@ const PlayList = require('./playlist');
 const TrackSearch = require('./tracksearch');
 
 const RadioSync = function (spotifyApi) {
-  const NUM_TRACKS = 250;
+  const NUM_STATION_TRACKS = 250;
+  const spotifyPlayList = new PlayList(spotifyApi);
+  const spotifySearch = new TrackSearch(spotifyApi);
 
   // look in the station track list for title and artist
   const inStationList = (title, artist, tracks) => {
     return tracks.some((track) => track.title === title && track.artist.artistName === artist);
   };
 
-  const fetchRecentlyPlayed = async (stationId, numTracks) => {
+  /**
+   * Use iheart radio's API to fetch the recently played tracks for a radio station
+   *
+   * @param {string} stationId - the iheart radio station ID
+   * @param {number} numTracks - the number of tracks to fetch
+   * @returns {Promise<Array>} - a promise that resolves to an array of recently played tracks
+   */
+  const fetchStationRecentlyPlayed = async (stationId, numTracks) => {
     const response = await fetch(
       `https://webapi.radioedit.iheart.com/graphql?operationName=GetCurrentlyPlayingSongs&variables=%7B%22slug%22%3A%22${stationId}%22%2C%22paging%22%3A%7B%22take%22%3A${numTracks}%7D%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22386763c17145056713327cddec890cd9d4fea7558efc56d09b7cd4167eef6060%22%7D%7D`,
     );
@@ -42,18 +51,28 @@ const RadioSync = function (spotifyApi) {
     return tracks.some((track) => track.name === title && track.artists.includes(artist));
   };
 
+  const findTrack = async (title, artist) => {
+    const track = await spotifySearch.findTrack(title, artist);
+
+    // store the original track title and artist for later use
+    return {
+      ...track,
+      searchTitle: title,
+      searchArtist: artist,
+    };
+  };
+
   /**
-   * search spotify for radio station tracks
+   * search spotify for tracks from the radio station
    *
    * @param {Array} stationTracks - radio station tracks
    * @returns an array of spotify track objects
    */
   const searchSpotifyTracks = async (stationTracks) => {
     // search for new tracks in spotify
-    const trackSearch = new TrackSearch(spotifyApi);
     const searchPromises = [];
     for (const track of stationTracks) {
-      searchPromises.push(trackSearch.findTrack(track.title, track.artist.artistName));
+      searchPromises.push(findTrack(track.title, track.artist.artistName));
     }
 
     // wait for all search promises to resolve
@@ -94,17 +113,30 @@ const RadioSync = function (spotifyApi) {
    */
   const getUniqueSpotifyTracks = (tracks, searchResults) => {
     const uniqueTracks = [];
+    if (!searchResults || searchResults.length === 0) {
+      return uniqueTracks;
+    }
 
     for (const searchTrack of searchResults) {
-      if (!searchTrack) {
+      if (!searchTrack || (!searchTrack.name && !searchTrack.artists?.[0]?.name)) {
         console.log(`No track found`);
         continue;
       }
 
       // there is a chance the artist/title didn't match exactly between iheartradio and spotify,
       // so we look up each track in the spotify playlist to see if the same track is already there
-      if (!inPlayList(searchTrack.name, searchTrack.artists[0].name, tracks)) {
-        console.log('Unique track:', searchTrack.name + ' by ' + searchTrack.artists[0].name);
+      if (!inPlayList(searchTrack.name, searchTrack.artists?.[0]?.name, tracks)) {
+        console.log(
+          'Unique track:',
+          searchTrack.name +
+            ' by ' +
+            searchTrack.artists?.[0]?.name +
+            ' (search critera: ' +
+            searchTrack.searchTitle +
+            ', ' +
+            searchTrack.searchArtist +
+            ')',
+        );
         uniqueTracks.push(searchTrack);
       }
     }
@@ -141,9 +173,8 @@ const RadioSync = function (spotifyApi) {
   };
 
   this.sync = async (stationId, playListId) => {
-    const playList = new PlayList(spotifyApi);
-    const playlistTracks = await playList.getTracks(playListId);
-    const stationTracks = await fetchRecentlyPlayed(stationId, NUM_TRACKS);
+    const playlistTracks = await spotifyPlayList.getTracks(playListId);
+    const stationTracks = await fetchStationRecentlyPlayed(stationId, NUM_STATION_TRACKS);
     console.log(`found ${stationTracks.length} stationTracks `);
 
     const newTracks = await findNewTracks(playlistTracks, stationTracks);
@@ -156,7 +187,7 @@ const RadioSync = function (spotifyApi) {
     // convert the tracks to spotify URIs for adding to the playlist
     const trackUris = newTracks.map((track) => `spotify:track:${track.id}`);
     console.log('Adding ' + trackUris.length + ' new tracks to playlist ' + playListId);
-    await playList.addTracks(playListId, trackUris);
+    await spotifyPlayList.addTracks(playListId, trackUris);
 
     // show what we added
     return newTracks;
