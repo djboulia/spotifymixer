@@ -122,13 +122,11 @@ const RadioSync = function (spotifyApi) {
    */
   const searchSpotifyTracks = async (stationTracks) => {
     // search for new tracks in spotify
-    const searchPromises = [];
+    const searchResults = [];
     for (const track of stationTracks) {
-      searchPromises.push(findTrack(track.title, track.artist.artistName));
+      console.log(`Searching for track: ${track.title} by ${track.artist.artistName}`);
+      searchResults.push(await findTrack(track.title, track.artist.artistName));
     }
-
-    // wait for all search promises to resolve
-    const searchResults = await Promise.all(searchPromises);
     return searchResults;
   };
 

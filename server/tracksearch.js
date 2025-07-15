@@ -69,7 +69,22 @@ const TrackSearch = function (spotifyApi) {
     const query = `"${title}" "${artist}"` + (albumName ? ` "${albumName}"` : '');
     const options = { limit: 10 };
 
-    const results = await spotifyApi.searchTracks(query, options);
+    const results = await spotifyApi.searchTracks(query, options).catch(async (error) => {
+      if (error.statusCode === 429) {
+        // Retry logic could be added here
+        const retryAfter = (error.headers['retry-after'] || 1) * 1000;
+        console.error('Rate limit exceeded, retrying after delay: ', retryAfter);
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(searchSpotify(title, artist, albumName));
+          }, retryAfter);
+        });
+      }
+      console.error('Error searching Spotify:', error);
+      console.error('headers:', error.headers, error.statusCode);
+      return { body: { tracks: { items: [] } } };
+    });
+
     const tracks = results.body.tracks.items;
     return tracks;
   };

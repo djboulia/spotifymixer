@@ -411,8 +411,15 @@ var PlayList = function (spotifyApi) {
    * @param {string[]} tracks an array of track URIs to add to the playlist
    */
   this.addTracks = async function (playListId, tracks) {
-    await spotifyApi.addTracksToPlaylist(playListId, tracks);
-    console.log('Added tracks to playlist ' + playListId);
+    // maximum of 100 tracks can be added at once
+    const chunkSize = 100;
+    for (let i = 0; i < tracks.length; i += chunkSize) {
+      const chunk = tracks.slice(i, i + chunkSize);
+      await spotifyApi.addTracksToPlaylist(playListId, chunk).catch((err) => {
+        console.error('Error adding tracks to playlist:', err);
+      });
+    }
+    console.log(`Added ${tracks.length} tracks to playlist ` + playListId);
   };
 };
 
