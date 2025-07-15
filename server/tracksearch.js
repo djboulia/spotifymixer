@@ -66,8 +66,7 @@ const TrackSearch = function (spotifyApi) {
   };
 
   const searchSpotify = async (title, artist, albumName) => {
-    const query =
-      `track:"${title}" artist:"${artist}"` + (albumName ? ` album:"${albumName}"` : '');
+    const query = `"${title}" "${artist}"` + (albumName ? ` "${albumName}"` : '');
     const options = { limit: 10 };
 
     const results = await spotifyApi.searchTracks(query, options);
