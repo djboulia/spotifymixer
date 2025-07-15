@@ -47,8 +47,60 @@ const RadioSync = function (spotifyApi) {
     return uniqueTracks;
   };
 
+  /**
+   * Normalize the track title by removing extraneous information,
+   * such as (Remastered 2020), [Remastered], - Remastered, (feat. Artist), etc.
+   * and converting to lowercase.
+   *
+   * @param {string} title - the original track title
+   * @returns {string} - the normalized track title
+   */
+  const normalizeTitle = (title) => {
+    let newTitle = title;
+
+    // regex to get the contents after the last hyphen in the track name
+    const hyphenMatch = newTitle.match(/-(.*)$/);
+    if (hyphenMatch) {
+      // console.log('Hyphen match : ', JSON.stringify(hyphenMatch, null, 2));
+      newTitle = newTitle.replace(/-(.*)$/, '').trim();
+      console.log('Removing hyphen from track name to ' + newTitle + ' from ' + title);
+    }
+
+    // regex to get the contents of the last pair of parentheses in the track name
+    const parensMatch = newTitle.match(/\(([^)]+)\)$/);
+    if (parensMatch) {
+      // console.log('Parenthesis match : ', JSON.stringify(match, null, 2));
+      newTitle = newTitle.replace(/\(([^)]+)\)$/, '').trim();
+      console.log('Removing parentheses from track name to ' + newTitle + ' from ' + title);
+    }
+
+    const bracketsMatch = newTitle.match(/\[(.*?)\]/);
+    if (bracketsMatch) {
+      // console.log('Brackets match : ', JSON.stringify(bracketsMatch, null, 2));
+      newTitle = newTitle.replace(/\[(.*?)\]/, '').trim();
+      console.log('Removing brackets from track name to ' + newTitle + ' from ' + title);
+    }
+
+    return newTitle.toLowerCase();
+  };
+
   const inPlayList = (title, artist, tracks) => {
-    return tracks.some((track) => track.name === title && track.artists.includes(artist));
+    if (tracks.some((track) => track.name === title && track.artists.includes(artist))) return true;
+
+    // no perfect match, normalize the titles and check again
+    for (const track of tracks) {
+      // if artist doesn't match, skip
+      if (!track.artists.includes(artist)) continue;
+
+      if (normalizeTitle(track.name) === normalizeTitle(title)) {
+        console.log(
+          `Found track in playlist: ${track.name} by ${track.artists[0]} (search: ${title} by ${artist})`,
+        );
+        return true;
+      }
+    }
+
+    return false;
   };
 
   const findTrack = async (title, artist) => {
