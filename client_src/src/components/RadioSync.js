@@ -45,79 +45,58 @@ const WNCB = {
   playListId: '5t809aA0Wvd6qrSHj6RUZL',
 };
 
+const DC101 = {
+  stationId: 'wwdc-fm',
+  playListId: '356fqj69ugsvFTBgRGK9Xr',
+};
+
+const Rock98 = {
+  stationId: 'wxtb-fm',
+  playListId: '7nyvjPt084p4cY7BPucDiF',
+};
+
+const U1009 = {
+  stationId: 'wiba-hd2',
+  playListId: '6ZPhEMCM684QeeHb86BXr1',
+};
+
+const BIG957 = {
+  stationId: 'writ-fm',
+  playListId: '5lcRbHcmQBqskUgv0OxFW4',
+};
+
+const Majic105 = {
+  stationId: 'wmji-fm',
+  playListId: '3HV1ocKu6cYKaOEOn8kihh',
+};
+
 export default function RadioSync() {
   const [wdgcResults, setWDCGResults] = useState([]);
   const [wrduResults, setWRDUResults] = useState([]);
   const [wmagResults, setWMAGResults] = useState([]);
   const [wncbResults, setWNCBResults] = useState([]);
+  const [dc101Results, setDC101Results] = useState([]);
+  const [rock98Results, setRock98Results] = useState([]);
+  const [u1009Results, setU1009Results] = useState([]);
+  const [big957Results, setBIG957Results] = useState([]);
+  const [majic105Results, setMajic105Results] = useState([]);
 
   const classes = useStyles();
 
-  const syncWDCG = function () {
-    const stationId = WDCG.stationId;
-    const playListId = WDCG.playListId;
+  const syncStation = (station, setResults) => {
+    const stationId = station.stationId;
+    const playListId = station.playListId;
 
-    setWDCGResults(undefined);
-
-    SpotifyApi.radioSync(stationId, playListId)
-      .then((results) => {
-        console.log('Sync results: ', results);
-        setWDCGResults(results);
-      })
-      .catch((error) => {
-        console.error('Error syncing radio station:', error);
-        setWDCGResults([]);
-      });
-  };
-
-  const syncWRDU = function () {
-    const stationId = WRDU.stationId;
-    const playListId = WRDU.playListId;
-
-    setWRDUResults(undefined);
+    setResults(undefined);
 
     SpotifyApi.radioSync(stationId, playListId)
       .then((results) => {
         console.log('Sync results: ', results);
-        setWRDUResults(results);
+        setResults(results);
       })
       .catch((error) => {
         console.error('Error syncing radio station:', error);
-        setWRDUResults([]);
-      });
-  };
-
-  const syncWMAG = function () {
-    const stationId = WMAG.stationId;
-    const playListId = WMAG.playListId;
-
-    setWMAGResults(undefined);
-
-    SpotifyApi.radioSync(stationId, playListId)
-      .then((results) => {
-        console.log('Sync results: ', results);
-        setWMAGResults(results);
-      })
-      .catch((error) => {
-        console.error('Error syncing radio station:', error);
-        setWMAGResults([]);
-      });
-  };
-
-  const syncWNCB = function () {
-    const stationId = WNCB.stationId;
-    const playListId = WNCB.playListId;
-
-    setWNCBResults(undefined);
-
-    SpotifyApi.radioSync(stationId, playListId)
-      .then((results) => {
-        console.log('Sync results: ', results);
-        setWNCBResults(results);
-      })
-      .catch((error) => {
-        console.error('Error syncing radio station:', error);
-        setWNCBResults([]);
+        setResults([]);
       });
   };
 
@@ -154,7 +133,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncWDCG();
+              syncStation(WDCG, setWDCGResults);
             }}
             className={classes.buttons}
             variant="contained"
@@ -169,7 +148,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncWRDU();
+              syncStation(WRDU, setWRDUResults);
             }}
             className={classes.buttons}
             variant="contained"
@@ -184,7 +163,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncWMAG();
+              syncStation(WMAG, setWMAGResults);
             }}
             className={classes.buttons}
             variant="contained"
@@ -199,7 +178,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncWNCB();
+              syncStation(WNCB, setWNCBResults);
             }}
             className={classes.buttons}
             variant="contained"
@@ -209,6 +188,81 @@ export default function RadioSync() {
           </Button>
           <div>
             <TrackResults results={wncbResults} />
+          </div>
+        </div>
+        <div className={classes.header}>
+          <Button
+            onClick={() => {
+              syncStation(DC101, setDC101Results);
+            }}
+            className={classes.buttons}
+            variant="contained"
+            color="primary"
+          >
+            DC101 (Rock)
+          </Button>
+          <div>
+            <TrackResults results={dc101Results} />
+          </div>
+        </div>
+        <div className={classes.header}>
+          <Button
+            onClick={() => {
+              syncStation(Rock98, setRock98Results);
+            }}
+            className={classes.buttons}
+            variant="contained"
+            color="primary"
+          >
+            98 Rock (Rock)
+          </Button>
+          <div>
+            <TrackResults results={rock98Results} />
+          </div>
+        </div>
+        <div className={classes.header}>
+          <Button
+            onClick={() => {
+              syncStation(U1009, setU1009Results);
+            }}
+            className={classes.buttons}
+            variant="contained"
+            color="primary"
+          >
+            U1009 (60s and 70s)
+          </Button>
+          <div>
+            <TrackResults results={u1009Results} />
+          </div>
+        </div>
+        <div className={classes.header}>
+          <Button
+            onClick={() => {
+              syncStation(BIG957, setBIG957Results);
+            }}
+            className={classes.buttons}
+            variant="contained"
+            color="primary"
+          >
+            BIG 95.7 (80s and 90s)
+          </Button>
+          <div>
+            <TrackResults results={big957Results} />
+          </div>
+        </div>
+        <div className={classes.header}>
+          <Button
+            onClick={() => {
+              syncStation(Majic105, setMajic105Results);
+            }}
+            className={classes.buttons}
+            variant="contained"
+            color="primary"
+          >
+            Majic 105.7 (70s and 80s)
+          </Button>
+          <div>
+            <TrackResults results={majic105Results} />
           </div>
         </div>
       </div>
