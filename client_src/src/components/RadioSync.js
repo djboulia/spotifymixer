@@ -71,6 +71,7 @@ const Majic105 = {
 };
 
 export default function RadioSync() {
+  const [loading, setLoading] = useState(false);
   const [wdgcResults, setWDCGResults] = useState([]);
   const [wrduResults, setWRDUResults] = useState([]);
   const [wmagResults, setWMAGResults] = useState([]);
@@ -83,21 +84,33 @@ export default function RadioSync() {
 
   const classes = useStyles();
 
-  const syncStation = (station, setResults) => {
+  const syncStation = async (station, setResults) => {
     const stationId = station.stationId;
     const playListId = station.playListId;
 
     setResults(undefined);
+    setLoading(true);
 
-    SpotifyApi.radioSync(stationId, playListId)
-      .then((results) => {
-        console.log('Sync results: ', results);
-        setResults(results);
-      })
-      .catch((error) => {
-        console.error('Error syncing radio station:', error);
-        setResults([]);
-      });
+    const results = await SpotifyApi.radioSync(stationId, playListId).catch((error) => {
+      console.error('Error syncing radio station:', error);
+      return [];
+    });
+
+    console.log('Sync results: ', results);
+    setResults(results);
+    setLoading(false);
+  };
+
+  const syncAll = async () => {
+    await syncStation(WDCG, setWDCGResults);
+    await syncStation(WRDU, setWRDUResults);
+    await syncStation(WMAG, setWMAGResults);
+    await syncStation(WNCB, setWNCBResults);
+    await syncStation(DC101, setDC101Results);
+    await syncStation(Rock98, setRock98Results);
+    await syncStation(U1009, setU1009Results);
+    await syncStation(BIG957, setBIG957Results);
+    await syncStation(Majic105, setMajic105Results);
   };
 
   const TrackResults = ({ results }) => {
@@ -135,6 +148,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(WDCG, setWDCGResults);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -150,6 +164,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(WRDU, setWRDUResults);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -165,6 +180,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(WMAG, setWMAGResults);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -180,6 +196,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(WNCB, setWNCBResults);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -195,6 +212,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(DC101, setDC101Results);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -210,6 +228,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(Rock98, setRock98Results);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -225,6 +244,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(U1009, setU1009Results);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -240,6 +260,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(BIG957, setBIG957Results);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -255,6 +276,7 @@ export default function RadioSync() {
             onClick={() => {
               syncStation(Majic105, setMajic105Results);
             }}
+            disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
@@ -265,6 +287,17 @@ export default function RadioSync() {
             <TrackResults results={majic105Results} />
           </div>
         </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Button
+          disabled={loading}
+          className={classes.buttons}
+          variant="contained"
+          color="secondary"
+          onClick={() => syncAll()}
+        >
+          Sync All
+        </Button>
       </div>
     </Dashboard>
   );
