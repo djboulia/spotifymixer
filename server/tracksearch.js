@@ -147,9 +147,16 @@ const TrackSearch = function (spotifyApi) {
     }
 
     if (artistTracks.length === 0) {
+      const printTracks = tracks.map((t) => ({
+        id: t.id,
+        name: t.name,
+        artist: t.artists.map((a) => a.name).join(', '),
+        uri: t.uri,
+      }));
+
       console.log(
         `No artist matches found for search ${title}, ${artist} tracks`,
-        JSON.stringify(tracks, null, 2),
+        JSON.stringify(printTracks, null, 2),
       );
 
       // try to match by title
