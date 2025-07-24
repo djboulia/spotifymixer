@@ -29,8 +29,8 @@ const normalizeTitle = (title) => {
     // console.log('Removing brackets from track name to ' + newTitle + ' from ' + title);
   }
 
-  // remove apostrophes and commas
-  newTitle = newTitle.replace(/['",]/g, '').trim();
+  // remove apostrophes and commas, single quotes, and double quotes
+  newTitle = newTitle.replace(/[’'",]/g, '').trim();
 
   return newTitle.toLowerCase();
 };
