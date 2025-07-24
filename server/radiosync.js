@@ -6,6 +6,8 @@
  */
 const PlayList = require('./playlist');
 const TrackSearch = require('./tracksearch');
+const { sameTitle } = require('./utils/title');
+const { sameArtist, sameArtistInList } = require('./utils/artist');
 
 const RadioSync = function (spotifyApi) {
   const NUM_STATION_TRACKS = 250;
@@ -14,7 +16,9 @@ const RadioSync = function (spotifyApi) {
 
   // look in the station track list for title and artist
   const inStationList = (title, artist, tracks) => {
-    return tracks.some((track) => track.title === title && track.artist.artistName === artist);
+    return tracks.some(
+      (track) => sameTitle(track.title, title) && sameArtist(track.artist.artistName, artist),
+    );
   };
 
   /**
@@ -36,63 +40,32 @@ const RadioSync = function (spotifyApi) {
     const data = await response.json();
     const tracks = data?.data?.sites?.find?.stream?.amp?.currentlyPlaying?.tracks || [];
 
-    // remove any duplicate tracks
+    // remove any duplicate tracks from the radio station list
+    // this can happen for popular tracks that are played multiple times
     const uniqueTracks = [];
     tracks.forEach((track) => {
-      if (!inStationList(track.title, track.artist.artistName, uniqueTracks)) {
+      if (!inStationList(track.title, track.artist?.artistName, uniqueTracks)) {
         uniqueTracks.push(track);
+      } else {
+        console.log(
+          `Duplicate track found in station list: ${track.title} by ${track.artist?.artistName}`,
+        );
       }
     });
 
     return uniqueTracks;
   };
 
-  /**
-   * Normalize the track title by removing extraneous information,
-   * such as (Remastered 2020), [Remastered], - Remastered, (feat. Artist), etc.
-   * and converting to lowercase.
-   *
-   * @param {string} title - the original track title
-   * @returns {string} - the normalized track title
-   */
-  const normalizeTitle = (title) => {
-    let newTitle = title;
-
-    // regex to get the contents after the last hyphen in the track name
-    const hyphenMatch = newTitle.match(/-(.*)$/);
-    if (hyphenMatch) {
-      // console.log('Hyphen match : ', JSON.stringify(hyphenMatch, null, 2));
-      newTitle = newTitle.replace(/-(.*)$/, '').trim();
-      console.log('Removing hyphen from track name to ' + newTitle + ' from ' + title);
-    }
-
-    // regex to get the contents of the last pair of parentheses in the track name
-    const parensMatch = newTitle.match(/\(([^)]+)\)$/);
-    if (parensMatch) {
-      // console.log('Parenthesis match : ', JSON.stringify(match, null, 2));
-      newTitle = newTitle.replace(/\(([^)]+)\)$/, '').trim();
-      console.log('Removing parentheses from track name to ' + newTitle + ' from ' + title);
-    }
-
-    const bracketsMatch = newTitle.match(/\[(.*?)\]/);
-    if (bracketsMatch) {
-      // console.log('Brackets match : ', JSON.stringify(bracketsMatch, null, 2));
-      newTitle = newTitle.replace(/\[(.*?)\]/, '').trim();
-      console.log('Removing brackets from track name to ' + newTitle + ' from ' + title);
-    }
-
-    return newTitle.toLowerCase();
-  };
-
   const inPlayList = (title, artist, tracks) => {
+    // try basic match first
     if (tracks.some((track) => track.name === title && track.artists.includes(artist))) return true;
 
     // no perfect match, normalize the titles and check again
     for (const track of tracks) {
       // if artist doesn't match, skip
-      if (!track.artists.includes(artist)) continue;
+      if (!sameArtistInList(track.artists, artist)) continue;
 
-      if (normalizeTitle(track.name) === normalizeTitle(title)) {
+      if (sameTitle(track.name, title)) {
         console.log(
           `Found track in playlist: ${track.name} by ${track.artists[0]} (search: ${title} by ${artist})`,
         );
@@ -218,6 +191,8 @@ const RadioSync = function (spotifyApi) {
     const searchResults = await searchSpotifyTracks(uniqueStationTracks);
 
     // double check that the search results are unique and not already in the playlist
+    // this can happen if a track name/artist isn't matched from the radio station version
+    // but is found in the spotify search
     const uniqueSpotifyTracks = getUniqueSpotifyTracks(tracks, searchResults);
     return uniqueSpotifyTracks;
   };
