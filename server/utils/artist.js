@@ -1,5 +1,16 @@
 const normalizeArtist = (artist) => {
-  const normalizedArtist = artist.toLowerCase().trim();
+  let normalizedArtist = artist.toLowerCase().trim();
+
+  // map e with accents to e without accents
+  // e.g. Beyoncé vs. Beyonce, Cèline Dion vs. Celine Dion
+  normalizedArtist = normalizedArtist
+    .replace(/é/g, 'e')
+    .replace(/è/g, 'e')
+    .replace(/ê/g, 'e')
+    .replace(/ë/g, 'e');
+
+  // remove any apostrophies, commas, and periods
+  normalizedArtist = normalizedArtist.replace(/[’',.]/g, '').trim();
 
   // translate & to "and" for better matching
   return normalizedArtist.replace(/&/g, 'and').replace(/ +/g, ' ').trim();
