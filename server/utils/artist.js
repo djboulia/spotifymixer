@@ -1,4 +1,6 @@
 const normalizeArtist = (artist) => {
+  if (!artist) return '';
+
   let normalizedArtist = artist.toLowerCase().trim();
 
   // map e with accents to e without accents

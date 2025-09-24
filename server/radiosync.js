@@ -17,7 +17,7 @@ const RadioSync = function (spotifyApi) {
   // look in the station track list for title and artist
   const inStationList = (title, artist, tracks) => {
     return tracks.some(
-      (track) => sameTitle(track.title, title) && sameArtist(track.artist.artistName, artist),
+      (track) => sameTitle(track.title, title) && sameArtist(track.artist?.artistName, artist),
     );
   };
 
@@ -115,6 +115,11 @@ const RadioSync = function (spotifyApi) {
     const uniqueTracks = [];
 
     stationTracks.forEach((stationTrack) => {
+      if (!stationTrack.artist?.artistName) {
+        console.error(`No artist for track: ${JSON.stringify(stationTrack, null, 2)}`);
+        return;
+      }
+
       if (!inPlayList(stationTrack.title, stationTrack.artist.artistName, tracks)) {
         // console.log(
         //   `Station track not in playlist: ${stationTrack.title} by ${stationTrack.artist.artistName}`,
