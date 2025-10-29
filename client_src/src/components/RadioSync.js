@@ -72,6 +72,7 @@ const Majic105 = {
 
 export default function RadioSync() {
   const [loading, setLoading] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
   const [wdgcResults, setWDCGResults] = useState([]);
   const [wrduResults, setWRDUResults] = useState([]);
   const [wmagResults, setWMAGResults] = useState([]);
@@ -99,6 +100,7 @@ export default function RadioSync() {
     console.log('Sync results: ', results);
     setResults(results);
     setLoading(false);
+    setLastSync(new Date());
   };
 
   const syncAll = async () => {
@@ -140,7 +142,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <div></div>
           <div>
-            <b>Last sync</b>
+            <b>Last sync {lastSync?.toLocaleString()}</b>
           </div>
         </div>
         <div className={classes.header}>
