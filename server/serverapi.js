@@ -69,9 +69,10 @@ var ServerApi = function (server) {
 
     const stationId = query.stationId || null;
     const playListId = query.playListId || null;
+    const numTracks = query.numTracks ? parseInt(query.numTracks) : undefined;
 
     const radioSync = new RadioSync(spotifyApi);
-    const results = await radioSync.sync(stationId, playListId);
+    const results = await radioSync.sync(stationId, playListId, numTracks);
 
     return results;
   }

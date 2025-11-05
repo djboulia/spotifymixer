@@ -113,10 +113,12 @@ const SpotifyApi = {
     });
   },
 
-  radioSync(stationId, playListId) {
+  radioSync(stationId, playListId, numTracks) {
     return new Promise((resolve, reject) => {
       return axios
-        .get(`/api/spotify/radioSync?stationId=${stationId}&playListId=${playListId}`)
+        .get(
+          `/api/spotify/radioSync?stationId=${stationId}&playListId=${playListId}&numTracks=${numTracks}`,
+        )
         .then((res) => {
           console.log(res);
 

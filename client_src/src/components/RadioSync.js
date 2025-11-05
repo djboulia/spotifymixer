@@ -23,6 +23,14 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#ffffff',
     padding: 20,
   },
+  numTracks: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '20px',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 20,
+  },
 }));
 
 const WRDU = {
@@ -37,7 +45,8 @@ const WDCG = {
 
 const WMAG = {
   stationId: 'wmag-fm',
-  playListId: '5ugQ31xoBaNmMIRFyyU5AQ',
+  playListId: '5sbYeTzDkrwSmTMBCC16AC', // Christmas 99.5 (Nov-Dec 2023)
+  //  playListId: '5ugQ31xoBaNmMIRFyyU5AQ', // Mix 99.5 (Non-Seasonal)
 };
 
 const WNCB = {
@@ -82,17 +91,18 @@ export default function RadioSync() {
   const [u1009Results, setU1009Results] = useState([]);
   const [big957Results, setBIG957Results] = useState([]);
   const [majic105Results, setMajic105Results] = useState([]);
+  const [numTracks, setNumTracks] = useState(250);
 
   const classes = useStyles();
 
-  const syncStation = async (station, setResults) => {
+  const syncStation = async (station, setResults, numTracks) => {
     const stationId = station.stationId;
     const playListId = station.playListId;
 
     setResults(undefined);
     setLoading(true);
 
-    const results = await SpotifyApi.radioSync(stationId, playListId).catch((error) => {
+    const results = await SpotifyApi.radioSync(stationId, playListId, numTracks).catch((error) => {
       console.error('Error syncing radio station:', error);
       return [];
     });
@@ -104,15 +114,15 @@ export default function RadioSync() {
   };
 
   const syncAll = async () => {
-    await syncStation(WDCG, setWDCGResults);
-    await syncStation(WRDU, setWRDUResults);
-    await syncStation(WMAG, setWMAGResults);
-    await syncStation(WNCB, setWNCBResults);
-    await syncStation(DC101, setDC101Results);
-    await syncStation(Rock98, setRock98Results);
-    await syncStation(U1009, setU1009Results);
-    await syncStation(BIG957, setBIG957Results);
-    await syncStation(Majic105, setMajic105Results);
+    await syncStation(WDCG, setWDCGResults, numTracks);
+    await syncStation(WRDU, setWRDUResults, numTracks);
+    await syncStation(WMAG, setWMAGResults, numTracks);
+    await syncStation(WNCB, setWNCBResults, numTracks);
+    await syncStation(DC101, setDC101Results, numTracks);
+    await syncStation(Rock98, setRock98Results, numTracks);
+    await syncStation(U1009, setU1009Results, numTracks);
+    await syncStation(BIG957, setBIG957Results, numTracks);
+    await syncStation(Majic105, setMajic105Results, numTracks);
   };
 
   const TrackResults = ({ results }) => {
@@ -138,6 +148,19 @@ export default function RadioSync() {
   return (
     <Dashboard>
       <Title>Sync Radio Station with Playlist:</Title>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        <div className={classes.numTracks}>
+          Tracks to Sync:
+          <input type="number" value={numTracks} onChange={(e) => setNumTracks(e.target.value)} />
+        </div>
+      </div>
       <div>
         <div className={classes.header}>
           <div></div>
@@ -148,7 +171,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(WDCG, setWDCGResults);
+              syncStation(WDCG, setWDCGResults, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -164,7 +187,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(WRDU, setWRDUResults);
+              syncStation(WRDU, setWRDUResults, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -180,14 +203,14 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(WMAG, setWMAGResults);
+              syncStation(WMAG, setWMAGResults, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
             variant="contained"
             color="primary"
           >
-            Mix 99.5
+            Mix 99.5 Holiday
           </Button>
           <div>
             <TrackResults results={wmagResults} />
@@ -196,7 +219,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(WNCB, setWNCBResults);
+              syncStation(WNCB, setWNCBResults, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -212,7 +235,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(DC101, setDC101Results);
+              syncStation(DC101, setDC101Results, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -228,7 +251,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(Rock98, setRock98Results);
+              syncStation(Rock98, setRock98Results, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -244,7 +267,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(U1009, setU1009Results);
+              syncStation(U1009, setU1009Results, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -260,7 +283,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(BIG957, setBIG957Results);
+              syncStation(BIG957, setBIG957Results, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}
@@ -276,7 +299,7 @@ export default function RadioSync() {
         <div className={classes.header}>
           <Button
             onClick={() => {
-              syncStation(Majic105, setMajic105Results);
+              syncStation(Majic105, setMajic105Results, numTracks);
             }}
             disabled={loading}
             className={classes.buttons}

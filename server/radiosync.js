@@ -202,9 +202,9 @@ const RadioSync = function (spotifyApi) {
     return uniqueSpotifyTracks;
   };
 
-  this.sync = async (stationId, playListId) => {
+  this.sync = async (stationId, playListId, numTracks = NUM_STATION_TRACKS) => {
     const playlistTracks = await spotifyPlayList.getTracks(playListId);
-    const stationTracks = await fetchStationRecentlyPlayed(stationId, NUM_STATION_TRACKS);
+    const stationTracks = await fetchStationRecentlyPlayed(stationId, numTracks);
     console.log(`found ${stationTracks.length} stationTracks `);
 
     const newTracks = await findNewTracks(playlistTracks, stationTracks);
