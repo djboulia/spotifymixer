@@ -5,6 +5,7 @@
   "proxy": "http://127.0.0.1:8888",
   "scripts": {
     "start": "REACT_APP_API_URL=http://127.0.0.1:8888 react-scripts start",
+    "dev": "REACT_APP_API_URL=http://127.0.0.1:8888 react-scripts start",
     "build": "react-scripts build && cp -r build/* ../client/",
     "dockerbuild": "react-scripts build",
     "test": "react-scripts test",
