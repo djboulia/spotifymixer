@@ -12,7 +12,7 @@ import Alert from '@material-ui/lab/Alert';
 import Title from './Title';
 import Dashboard from './Dashboard';
 import SpotifyApi from '../lib/SpotifyApi';
-import ProgressModal from './PlaylistProgressModal';
+import PlaylistProgressModal from './PlaylistProgressModal';
 
 // Generate Playlist Data
 
@@ -32,7 +32,7 @@ export default function Playlists() {
   const [playListDetails, setPlayListDetails] = React.useState({ name: 'Play List', img: '' });
   const [multipleStatus, setMultipleStatus] = React.useState(undefined);
   const [percentComplete, setPercentComplete] = React.useState(0);
-  const [artists, setArtists] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
 
   // set a timer to monitor progress
   const checkProgress = async () => {
@@ -58,7 +58,7 @@ export default function Playlists() {
           setMultipleStatus(result.multiple);
         }
 
-        setArtists(result.artists);
+        setCategories(result.categories);
 
         // still in proogress, so set another time out to check again
         setTimeout(() => {
@@ -92,7 +92,7 @@ export default function Playlists() {
     setPercentComplete(0);
     setPlayListDetails({ name: 'Play List', img: '' });
     setMultipleStatus(undefined);
-    setArtists([]);
+    setCategories([]);
 
     startProgressTimer();
   };
@@ -144,11 +144,11 @@ export default function Playlists() {
   }
 
   const progressIndicator = (
-    <ProgressModal
+    <PlaylistProgressModal
       playlist={playListDetails}
       multipleStatus={multipleStatus}
       percentComplete={percentComplete}
-      artists={artists}
+      categories={categories}
     />
   );
 

@@ -15,7 +15,7 @@ var ShuffleProgress = function () {
   this.inProgress = false;
   this.shuffled = 0;
   this.total = 0;
-  this.artists = [];
+  this.categories = [];
   this.playList = undefined;
   this.multiple = undefined;
 
@@ -31,7 +31,7 @@ var ShuffleProgress = function () {
       inProgress: this.inProgress,
       shuffled: this.shuffled,
       total: this.total,
-      artists: this.artists,
+      categories: this.categories,
       playList: this.playList,
       multiple: this.multiple,
     };
@@ -44,7 +44,7 @@ var ShuffleProgress = function () {
     this.inProgress = false;
     this.shuffled = 0;
     this.total = 0;
-    this.artists = [];
+    this.categories = [];
     this.playList = undefined;
     this.multiple = undefined;
   };
@@ -58,7 +58,7 @@ var ShuffleProgress = function () {
     this.inProgress = true;
     this.shuffled = 0;
     this.total = 0;
-    this.artists = [];
+    this.categories = [];
     this.playList = undefined;
     this.multiple = undefined;
   };
@@ -75,12 +75,12 @@ var ShuffleProgress = function () {
   };
 
   /**
-   * set the most popular artists in this shuffle
+   * set the most popular categories in this shuffle
    *
-   * @param {Array} artists array of artist names and track counts
+   * @param {Array} categories array of category names and track counts
    */
-  this.setArtists = function (artists) {
-    this.artists = artists;
+  this.setCategories = function (categories) {
+    this.categories = categories;
   };
 
   /**
@@ -119,7 +119,7 @@ var ShuffleProgress = function () {
        * @param {Number} shuffled tracks shuffled so far
        * @param {Number} total total number of tracks
        */
-      const updateShuffleProgress = function (shuffled, total) {
+      const updateShuffleProgress = function (shuffled) {
         // console.log('updateShuffleProgress ' + shuffled);
         self.setShuffled(shuffled);
       };
@@ -130,7 +130,7 @@ var ShuffleProgress = function () {
 
       const result = await mixer.getMixedTrackList(playListId);
 
-      self.setArtists(result.artists);
+      self.setCategories(result.categories);
       self.setTotal(result.before.length);
 
       await mixer.reorderPlaylist(playListId, result.before, result.after, updateShuffleProgress);

@@ -82,8 +82,8 @@ var SpotifySession = function (server, serverConfig, spotifyConfig) {
     if (!spotifyApi.isAuthenticated(context.session)) {
       // good for testing purposes
       // try getting a stored token from a.prior session
-      // if (!spotifyApi.setStoredToken(context.session))
-      throw server.serverError(401, 'Please authenticate with the Spotify API first');
+      if (!spotifyApi.setStoredToken(context.session))
+        throw server.serverError(401, 'Please authenticate with the Spotify API first');
     }
 
     return true;

@@ -5,7 +5,7 @@ import Alert from '@material-ui/lab/Alert';
 import { Dialog, DialogTitle, DialogContent } from '@material-ui/core';
 import { Table, TableBody, TableHead, TableRow, TableCell } from '@material-ui/core';
 
-// Show a modal progress dialog with top artist info while we shuffle the tracks
+// Show a modal progress dialog with top category info while we shuffle the tracks
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -31,21 +31,23 @@ const useStyles = makeStyles((theme) => ({
 export default function PlaylistProgressModal(props) {
   const classes = useStyles();
 
-  const artistStats = function (artists) {
-    if (!artists || artists.length == 0) {
-      return <Alert severity="info">Loading artists...</Alert>;
+  const categoryStats = function (categories) {
+    console.log('categories: ', categories);
+    if (!categories || categories?.length === 0) {
+      return <Alert severity="info">Loading categories...</Alert>;
     }
 
     const rows = [];
-    for (let i = 0; i < artists.length; i++) {
-      const artist = artists[i];
+    for (let i = 0; i < categories.length; i++) {
+      const category = categories[i];
 
-      // only show artists with at least 2 tracks
-      if (artist.artist != '[singles]') {
+      // only show categories with at least 2 tracks
+      if (category.category != '[singles]') {
         rows.push(
           <TableRow key={i}>
-            <TableCell>{artist.artist}</TableCell>
-            <TableCell align="right">{artist.length}</TableCell>
+            <TableCell>{category.category}</TableCell>
+            <TableCell>{category.type === 'artist' ? 'Artist' : 'Title'}</TableCell>
+            <TableCell align="right">{category.length}</TableCell>
           </TableRow>,
         );
       }
@@ -55,8 +57,9 @@ export default function PlaylistProgressModal(props) {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Top Artists</TableCell>
-            <TableCell align="right">Tracks</TableCell>
+            <TableCell>Top Tracks</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell align="right">Songs</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>{rows}</TableBody>
@@ -90,7 +93,9 @@ export default function PlaylistProgressModal(props) {
       <LinearProgress variant="determinate" value={props.percentComplete}></LinearProgress>
 
       <DialogContent>
-        <div style={{ minHeight: '200px', maxHeight: '200px' }}>{artistStats(props.artists)}</div>
+        <div style={{ minHeight: '200px', maxHeight: '200px' }}>
+          {categoryStats(props.categories)}
+        </div>
       </DialogContent>
     </Dialog>
   );

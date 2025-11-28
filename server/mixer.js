@@ -1,6 +1,7 @@
 const PlayList = require('./playlist');
 const TrackUtils = require('./trackutils');
 const logger = require('./logger');
+const { normalizeTitle } = require('./utils/title');
 
 /**
  * This class implements the shuffle algorithm.  It sorts by artist first,
@@ -25,28 +26,29 @@ const Mixer = function (spotifyApi) {
   };
 
   /**
-   * takes an object where each property is an artist name and each
-   * value is the array of tracks associated with this artist.
+   * takes an object where each property is a categoery and each
+   * value is an array of tracks
    *
-   * Sorts based on number of tracks and returns an array of the
+   * Sorts categories based on number of tracks and returns an array of the
    * sorted values.
    *
-   * @param {Object} stats
+   * @param {Object} categories
    */
-  var sortStats = function (stats) {
+  const sortStats = function (categories) {
     const arrayStats = [];
     const singles = [];
 
-    for (prop in stats) {
-      if (stats[prop].length > 1) {
-        logger.info('artist ' + prop + ' has ' + stats[prop].length + ' songs');
+    for (prop in categories) {
+      if (categories[prop].tracks.length > 1) {
+        logger.info('category ' + prop + ' has ' + categories[prop].tracks.length + ' songs');
         arrayStats.push({
-          artist: prop,
-          tracks: stats[prop],
+          type: categories[prop].type,
+          category: categories[prop].category,
+          tracks: categories[prop].tracks,
         });
       } else {
         // combine single track artists
-        singles.push(stats[prop][0]);
+        singles.push(categories[prop].tracks[0]);
       }
     }
 
@@ -66,12 +68,109 @@ const Mixer = function (spotifyApi) {
       TrackUtils.shuffle(singles);
 
       arrayStats.push({
-        artist: '[singles]',
+        type: 'artist',
+        category: '[singles]',
         tracks: singles,
       });
     }
 
     return arrayStats;
+  };
+
+  const getCategoriesTrackCount = function (categories) {
+    let count = 0;
+    for (const prop in categories) {
+      count += categories[prop].tracks.length;
+    }
+    return count;
+  };
+
+  /**
+   * Take the original track list and build arrays of "categories".  This could be any criteria, but for our
+   * purposes, we are defining categories based on two criteria
+   *
+   * 1) duplicate song titles (remixes, live versions, covers by other artists, etc)
+   * 2) artist name
+   *
+   * Each category will be an array of tracks that match that category.  The resulting categories will
+   * then be sorted by size (number of tracks) so that we can lay them out in the playlist
+   *
+   * @param {Object} tracks array of spotify track objects
+   * @returns
+   */
+  const sortByCategories = async function (tracks) {
+    const self = this;
+
+    const categories = {};
+    const titles = {};
+    const artists = [];
+
+    // build a map keyed off song titles; this will catch duplicate track titles
+    for (const track of tracks) {
+      const title = normalizeTitle(track.track.name);
+      const titleList = titles[title] ? titles[title] : [];
+      titleList.push(track);
+      titles[title] = titleList;
+    }
+
+    // add duplicate title tracks as categories, singles go into a separate array of artists
+    for (const title of Object.keys(titles)) {
+      const titleList = titles[title];
+      if (titleList.length > 1) {
+        logger.info('Found duplicate title "' + title + '" with ' + titleList.length + ' versions');
+        const name = titleList[0].track.name; // get non normalized name for display
+        categories[title] = {
+          type: 'title',
+          category: name,
+          tracks: titleList,
+        };
+      } else {
+        // put any single tracks into an artist list
+        const track = titleList[0];
+        artists.push(track);
+      }
+    }
+
+    // go through artists and categorize tracks by the same artist
+    logger.info('Found  ' + artists.length + ' non-duplicate title tracks in playlist');
+    for (let i = 0; i < artists.length; i++) {
+      const track = artists[i];
+
+      // logger.info('Retrieved track name:', track.track.name);
+      // logger.info('Retrieved track artist:', track.track.artists);
+
+      const trackArtists = track.track.artists;
+      if (trackArtists.length > 1) {
+        logger.error(
+          'Warning: more than one artist in this track. Using first one in this list: ',
+          trackArtists,
+        );
+      }
+      const artist = trackArtists[0].name;
+      // logger.info('Found artist name:', artist);
+
+      const tracklist = categories[artist]?.tracks ? categories[artist].tracks : [];
+      tracklist.push(track);
+
+      categories[artist] = {
+        type: 'artist',
+        category: artist,
+        tracks: tracklist,
+      };
+    }
+
+    // double check we ended up with the same total number of tracks after building categories
+    const count = getCategoriesTrackCount(categories);
+    if (count !== tracks.length) {
+      logger.error('Error: track count mismatch!  Expected ' + tracks.length + ' but got ' + count);
+      throw new Error('Track count mismatch!');
+    }
+    logger.info(
+      'Categorized ' + count + ' tracks into ' + Object.keys(categories).length + ' categories',
+    );
+
+    const sortedCategories = sortStats(categories);
+    return sortedCategories;
   };
 
   /**
@@ -95,7 +194,7 @@ const Mixer = function (spotifyApi) {
    * @param {Object} track track to insert
    * @param {Number} rando random seed to start to lay out this track
    */
-  var placeInFrame = function (list, start, frameSize, track, rando) {
+  const placeInFrame = function (list, start, frameSize, track, rando) {
     // first try to pick a random number in the back half of the frame
     logger.info('start ' + start + ', frameSize ' + frameSize + ', rando ' + rando);
 
@@ -141,7 +240,7 @@ const Mixer = function (spotifyApi) {
    * @param {Number} frameSize size of frame to search
    * @param {Object} track track to insert
    */
-  var placeHighInFrame = function (list, start, frameSize, track) {
+  const placeHighInFrame = function (list, start, frameSize, track) {
     // first try to pick a random number in the back half of the frame
     const rando = start + (frameSize - Math.floor(Math.random() * Math.floor(frameSize / 2))) - 1;
 
@@ -156,7 +255,7 @@ const Mixer = function (spotifyApi) {
    * @param {Number} frameSize size of frame to search
    * @param {Object} track track to insert
    */
-  var placeLowInFrame = function (list, start, frameSize, track) {
+  const placeLowInFrame = function (list, start, frameSize, track) {
     // first try to pick a random number in the first half of the frame
     const rando = Math.floor(Math.random() * Math.floor(frameSize / 2)) + start;
 
@@ -169,7 +268,7 @@ const Mixer = function (spotifyApi) {
    * @param {Array} sortedStats
    * @returns an array with the mixed playlist
    */
-  var buildPlaylist = function (sortedStats) {
+  const buildPlaylist = function (sortedStats) {
     // first figure out how big the track list is
     let total = 0;
     for (let i = 0; i < sortedStats.length; i++) {
@@ -236,34 +335,7 @@ const Mixer = function (spotifyApi) {
     self.snapshot_id = trackList.snapshot_id;
     const tracks = trackList.tracks;
 
-    const stats = {};
-
-    logger.info('Found  ' + tracks.length + ' tracks in playlist');
-    for (let i = 0; i < tracks.length; i++) {
-      const track = tracks[i];
-
-      // logger.info('Retrieved track name:', track.track.name);
-      // logger.info('Retrieved track artist:', track.track.artists);
-
-      const artists = track.track.artists;
-      if (artists.length > 1) {
-        logger.error(
-          'Warning: more than one artist in this track. Using first one in this list: ',
-          artists,
-        );
-      }
-      const artist = artists[0].name;
-      // logger.info('Found artist name:', artist);
-
-      const tracklist = stats[artist] ? stats[artist] : [];
-      tracklist.push(track);
-
-      stats[artist] = tracklist;
-    }
-
-    logger.info('Found total of ' + tracks.length + ' tracks');
-
-    const sortedStats = sortStats(stats);
+    const sortedStats = await sortByCategories(tracks);
 
     // logger.info("sorted stats: ", sortedStats);
 
@@ -274,11 +346,12 @@ const Mixer = function (spotifyApi) {
     TrackUtils.printTracks(tracks);
 
     // summarize the sorted stats and return those
-    const artistStats = [];
+    const categoryStats = [];
     for (let i = 0; i < sortedStats.length; i++) {
       const stat = sortedStats[i];
-      artistStats.push({
-        artist: stat.artist,
+      categoryStats.push({
+        type: stat.type,
+        category: stat.category,
         length: stat.tracks.length,
       });
     }
@@ -286,7 +359,7 @@ const Mixer = function (spotifyApi) {
     return {
       before: tracks,
       after: mixList,
-      artists: artistStats,
+      categories: categoryStats,
     };
   };
 

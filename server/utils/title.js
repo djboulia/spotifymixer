@@ -44,4 +44,5 @@ const sameTitle = (title1, title2) => {
 
 module.exports = {
   sameTitle,
+  normalizeTitle,
 };
