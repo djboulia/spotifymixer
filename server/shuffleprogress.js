@@ -110,10 +110,10 @@ var ShuffleProgress = function () {
    * @param {String} playListId
    * @returns Promise which resolves when shuffle is complete or rejects on error
    */
-  this.shufflePlayList = function (spotifyApi, playListId) {
-    return new Promise((resolve, reject) => {
-      const self = this;
+  this.shufflePlayList = async function (spotifyApi, playListId) {
+    const self = this;
 
+    try {
       /**
        * callback function for updating progress as we re-order tracks
        * @param {Number} shuffled tracks shuffled so far
@@ -126,49 +126,31 @@ var ShuffleProgress = function () {
 
       const mixer = new Mixer(spotifyApi);
 
-      mixer.getPlayListDetails(playListId).then(function (details) {
-        self.setPlayList(details);
-      });
+      this.setPlayList(await mixer.getPlayListDetails(playListId));
 
-      mixer.getMixedTrackList(playListId).then(
-        function (result) {
-          self.setArtists(result.artists);
-          self.setTotal(result.before.length);
+      const result = await mixer.getMixedTrackList(playListId);
 
-          mixer
-            .reorderPlaylist(playListId, result.before, result.after, updateShuffleProgress)
-            .then(
-              function () {
-                // go back and look at this playlist to verify it's in the right order
-                mixer.getTracks(playListId).then(
-                  function (data) {
-                    const tracks = data.tracks;
+      self.setArtists(result.artists);
+      self.setTotal(result.before.length);
 
-                    if (TrackUtils.identicalTrackLists(result.after, tracks)) {
-                      console.log('Track lists match!');
-                    } else {
-                      console.log('expected: ');
-                      TrackUtils.printTracks(result.after);
-                      console.log('got: ');
-                      TrackUtils.printTracks(tracks);
-                    }
-                    resolve();
-                  },
-                  function (err) {
-                    reject(err);
-                  },
-                );
-              },
-              function (err) {
-                reject(err);
-              },
-            );
-        },
-        function (err) {
-          reject(err);
-        },
-      );
-    });
+      await mixer.reorderPlaylist(playListId, result.before, result.after, updateShuffleProgress);
+
+      // go back and look at this playlist to verify it's in the right order
+      const data = await mixer.getTracks(playListId);
+      const tracks = data.tracks;
+
+      if (TrackUtils.identicalTrackLists(result.after, tracks)) {
+        console.log('Track lists match!');
+      } else {
+        console.log('expected: ');
+        TrackUtils.printTracks(result.after);
+        console.log('got: ');
+        TrackUtils.printTracks(tracks);
+      }
+    } catch (err) {
+      console.error('Error during shufflePlayList: ', err);
+      throw err;
+    }
   };
 };
 
