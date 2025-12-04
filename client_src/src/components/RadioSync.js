@@ -122,7 +122,7 @@ export default function RadioSync() {
     await syncStation(Rock98, setRock98Results, numTracks);
     await syncStation(U1009, setU1009Results, numTracks);
     await syncStation(BIG957, setBIG957Results, numTracks);
-    await syncStation(Majic105, setMajic105Results, numTracks);
+    // await syncStation(Majic105, setMajic105Results, numTracks);
   };
 
   const TrackResults = ({ results }) => {
@@ -297,7 +297,8 @@ export default function RadioSync() {
           </div>
         </div>
         <div className={classes.header}>
-          <Button
+          {/* turn off during christmas season */}
+          {/* <Button
             onClick={() => {
               syncStation(Majic105, setMajic105Results, numTracks);
             }}
@@ -307,7 +308,7 @@ export default function RadioSync() {
             color="primary"
           >
             Majic 105.7 (70s and 80s)
-          </Button>
+          </Button> */}
           <div>
             <TrackResults results={majic105Results} />
           </div>
