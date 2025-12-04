@@ -1,6 +1,7 @@
 # Spotify Mixer
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+It uses TypeScript, Next.js, React, and Tailwind CSS.
 
 ## Goals for this app:
 
@@ -10,14 +11,14 @@ back to back. If you were listening to the radio and an Elton John song came on,
 So here are the basic rules I came up with:
 
 - Wouldn’t hear the same artist close together
-- Wouldn’t hear the same titled song by two diff artists close together
+- Wouldn’t hear the same titled songs (either covers of the same song by different artists, or duplicate songs by the same artist) close together
 - Random within an artist or version of a song, but spaced roughly evenly throughout playlist
 
 ## Approach
 
-- The order of the artists based on most to least songs by the same artist, ending with all songs in the playlist where an artist only appears once.
-- The order of the songs by the same artist is random
-- The frequency of each artist through playlist is not random
+- Order the artists based on most to least songs, ending with all songs in the playlist where an artist only appears once.
+- Order of the songs by the same artist is randomized. So if there are 15 Bruce Springsteen songs, the order of those 15 songs is random within the playlist.
+- The frequency of each artist or duplicate tracks through playlist is NOT random. They are spaced roughly evenly throughout the playlist. This avoids clustering of the same artist or duplicate songs close together in the playlist.
 
 ## Algorithm
 
@@ -28,13 +29,11 @@ So here are the basic rules I came up with:
 - Look for like-named songs across artists. Swap appropriately to keep them apart
 - Layout the new playlist
 
+# Radio Sync
+
+- I added a feature where you can sync your playlist to a radio station from iHeartRadio.
+- Currently this is hard coded to a set of stations matched to a playlist, but I plan to expand this in the future.
+
 ## Deployment
 
-The original implementation was as a Cloud Foundry application. The manifest.yml defines the configuration for CF.
-
-I later Docker-ized the application. See Dockerfile in the root directory for that configuration.
-
-The Docker version can be deployed via IBM Cloud Engine to be run as a serverless implementation.
-
-I also deployed to Azure App Engine. To do that, follow these steps:
-az webapp up
+The app is currently deployed on an AWS EC2 instance running Ubuntu.
