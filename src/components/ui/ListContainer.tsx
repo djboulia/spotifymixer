@@ -1,6 +1,6 @@
 import classNames from "classnames";
 
-export const PlaylistContainer = ({
+export const ListContainer = ({
   header,
   children,
 }: {

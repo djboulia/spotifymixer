@@ -9,13 +9,13 @@ import type {
   MixerCategoryStats,
 } from "~/models/shuffle";
 import { Alert } from "./ui/Alert";
-import { ShuffleProgressModal } from "./ShuffleProgressModal";
+import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
 import { Button } from "./ui/Button";
-import { PlaylistImage } from "./PlaylistImage";
-import { PlaylistRow } from "./PlaylistRow";
-import { PlaylistContainer } from "./PlaylistContainer";
-import { PlaylistHeader } from "./PlaylistHeader";
-import { PageContainer } from "./PageContainer";
+import { PlaylistImage } from "./shuffle/PlaylistImage";
+import { PlaylistRow } from "./shuffle/PlaylistRow";
+import { ListContainer } from "./ui/ListContainer";
+import { ListHeader } from "./ui/ListHeader";
+import { PageContainer } from "./ui/PageContainer";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };
 
@@ -148,9 +148,9 @@ export const ShuffleMultiple = ({
     <PageContainer title={`Playlists for ${user?.name}`}>
       {inProgress && progressIndicator}
 
-      <PlaylistContainer
+      <ListContainer
         header={
-          <PlaylistHeader>
+          <ListHeader>
             <div className="flex w-full flex-row items-center justify-center">
               <Button
                 disabled={inProgress || nothingSelected()}
@@ -160,7 +160,7 @@ export const ShuffleMultiple = ({
                 label="Shuffle Selected"
               />
             </div>
-          </PlaylistHeader>
+          </ListHeader>
         }
       >
         {playlistsChecked.map((playlist) => (
@@ -184,7 +184,7 @@ export const ShuffleMultiple = ({
             <div className="flex w-[100px] justify-end">{playlist.total}</div>
           </PlaylistRow>
         ))}
-      </PlaylistContainer>
+      </ListContainer>
     </PageContainer>
   );
 };

@@ -1,10 +1,10 @@
-import { PageContainer } from "./PageContainer";
-import { PlaylistContainer } from "./PlaylistContainer";
+import { PageContainer } from "./ui/PageContainer";
+import { ListContainer } from "./ui/ListContainer";
 
 export const About = () => {
   return (
     <PageContainer title="About Spotify Mixer">
-      <PlaylistContainer>
+      <ListContainer>
         <div className="mx-5 flex flex-col justify-center">
           <div className="my-5 flex justify-center">
             I have lots of large playlists. The normal shuffle function in
@@ -42,7 +42,7 @@ export const About = () => {
             <li>The frequency of each artist through playlist is not random</li>
           </ul>
         </div>
-      </PlaylistContainer>
+      </ListContainer>
     </PageContainer>
   );
 };

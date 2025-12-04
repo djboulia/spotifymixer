@@ -9,13 +9,13 @@ import type {
   MixerCategoryStats,
 } from "~/models/shuffle";
 import { Alert } from "./ui/Alert";
-import { ShuffleProgressModal } from "./ShuffleProgressModal";
+import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
 import { Button } from "./ui/Button";
-import { PlaylistImage } from "./PlaylistImage";
-import { PlaylistRow } from "./PlaylistRow";
-import { PlaylistContainer } from "./PlaylistContainer";
-import { PlaylistHeader } from "./PlaylistHeader";
-import { PageContainer } from "./PageContainer";
+import { PlaylistImage } from "./shuffle/PlaylistImage";
+import { PlaylistRow } from "./shuffle/PlaylistRow";
+import { ListContainer } from "./ui/ListContainer";
+import { ListHeader } from "./ui/ListHeader";
+import { PageContainer } from "./ui/PageContainer";
 
 export const Shuffle = ({
   user,
@@ -121,16 +121,16 @@ export const Shuffle = ({
     <PageContainer title={`Playlists for ${user?.name}`}>
       {inProgress && progressIndicator}
 
-      <PlaylistContainer
+      <ListContainer
         header={
-          <PlaylistHeader>
+          <ListHeader>
             <div className="flex w-[100px] justify-center">Action</div>
             <div className="w-10" />
             <div className="flex w-[100px] justify-start md:w-[200px]">
               Playlist
             </div>
             <div className="flex w-[50px] justify-end md:w-[100px]">Songs</div>
-          </PlaylistHeader>
+          </ListHeader>
         }
       >
         {playlists.map((playlist) => (
@@ -154,7 +154,7 @@ export const Shuffle = ({
             </div>
           </PlaylistRow>
         ))}
-      </PlaylistContainer>
+      </ListContainer>
     </PageContainer>
   );
 };

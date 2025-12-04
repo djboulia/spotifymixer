@@ -1,5 +1,5 @@
-import { NavMenu } from "./NavMenu";
-import { Title } from "./ui/Title";
+import { NavMenu } from "../NavMenu";
+import { Title } from "./Title";
 
 export const PageContainer = ({
   title,

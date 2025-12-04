@@ -4,11 +4,11 @@ import { useState } from "react";
 import * as SpotifyApi from "~/app/server-actions/spotify";
 import type { SpotifyTrackWithSearch } from "~/models/playlist";
 import { Button } from "./ui/Button";
-import { PlaylistContainer } from "./PlaylistContainer";
-import { PlaylistHeader } from "./PlaylistHeader";
-import { RadioRow } from "./RadioRow";
-import { StationSyncResults } from "./StaionSyncResults";
-import { PageContainer } from "./PageContainer";
+import { ListContainer } from "./ui/ListContainer";
+import { ListHeader } from "./ui/ListHeader";
+import { RadioRow } from "./sync/RadioRow";
+import { StationSyncResults } from "./sync/StationSyncResults";
+import { PageContainer } from "./ui/PageContainer";
 
 type RadioStation = {
   name: string; // Station Name which shows on the button
@@ -143,9 +143,9 @@ export default function RadioSync() {
 
   return (
     <PageContainer title="Sync Radio Station with Playlist">
-      <PlaylistContainer
+      <ListContainer
         header={
-          <PlaylistHeader>
+          <ListHeader>
             <div className="flex w-full flex-col items-center justify-center gap-4">
               <div className="flex flex-row items-center justify-between gap-4">
                 <div>Tracks to Sync:</div>
@@ -164,13 +164,13 @@ export default function RadioSync() {
                 </div>
               </div>
             </div>
-          </PlaylistHeader>
+          </ListHeader>
         }
       >
         {radioStationResults.map((station) => (
           <StationRow key={station.stationId} radioStation={station} />
         ))}
-      </PlaylistContainer>
+      </ListContainer>
 
       <div className="flex flex-row items-center justify-center">
         <Button
