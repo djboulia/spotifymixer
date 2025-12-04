@@ -36,7 +36,7 @@ export const StationSyncResults = ({
         {results.map((track) => (
           <div
             key={track.id}
-            className="w-[200px] truncate overflow-hidden text-right text-ellipsis whitespace-nowrap md:w-[300px] lg:w-[400px]"
+            className="w-[200px] truncate overflow-hidden text-right text-ellipsis whitespace-nowrap md:w-[200px] lg:w-[400px]"
           >
             {track.name} by {track.artists[0]?.name ?? "Unknown Artist"}
           </div>

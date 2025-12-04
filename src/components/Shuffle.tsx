@@ -8,9 +8,9 @@ import type {
   MultipleShuffleProgressStatus,
   MixerCategoryStats,
 } from "~/models/shuffle";
-import { Alert } from "./Alert";
+import { Alert } from "./ui/Alert";
 import { ShuffleProgressModal } from "./ShuffleProgressModal";
-import { Button } from "./Button";
+import { Button } from "./ui/Button";
 import { PlaylistImage } from "./PlaylistImage";
 import { PlaylistRow } from "./PlaylistRow";
 import { PlaylistContainer } from "./PlaylistContainer";

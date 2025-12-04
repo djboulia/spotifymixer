@@ -3,7 +3,7 @@
 import { useState } from "react";
 import * as SpotifyApi from "~/app/server-actions/spotify";
 import type { SpotifyTrackWithSearch } from "~/models/playlist";
-import { Button } from "./Button";
+import { Button } from "./ui/Button";
 import { PlaylistContainer } from "./PlaylistContainer";
 import { PlaylistHeader } from "./PlaylistHeader";
 import { RadioRow } from "./RadioRow";
