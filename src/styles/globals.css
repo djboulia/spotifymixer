@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --color-spotify-50: #eef7ef;
+  --color-spotify-100: #ddeedf;
+  --color-spotify-200: #badebe;
+  --color-spotify-300: #98cd9e;
+  --color-spotify-400: #75bd7e;
+  --color-spotify-500: #53ac5d;
+  --color-spotify-600: #428a4b;
+  --color-spotify-700: #326738;
+  --color-spotify-800: #214525;
+  --color-spotify-900: #112213;
+  --color-spotify-950: #0c180d;
+}

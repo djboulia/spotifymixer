@@ -5,31 +5,42 @@
 /.pnp
 .pnp.js
 
-#ignore local modules
-/local_modules
-
 # testing
 /coverage
 
-# production client files are built, not tracked
-/client
-/build
+# database
+/prisma/db.sqlite
+/prisma/db.sqlite-journal
+db.sqlite
 
-# IDEs and editors
-/.idea
-/.vscode
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
 
 # misc
 .DS_Store
-.env
-.env.dev
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+*.pem
 
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-spotify_tokens.json
+# local env files
+# do not commit any .env files to git, except for the .env.example file. https://create.t3.gg/en/usage/env-variables#using-environment-variables
+.env
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# idea files
+.idea
