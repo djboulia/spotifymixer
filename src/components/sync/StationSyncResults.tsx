@@ -7,7 +7,7 @@ export const StationSyncResults = ({
 }) => {
   const LastSyncContainer = ({ children }: { children: React.ReactNode }) => {
     return (
-      <div className="text-light-200 flex w-full flex-row justify-start gap-4 px-4 py-2 md:justify-end">
+      <div className="text-foreground/75 flex w-full flex-row justify-start gap-4 px-4 py-2 md:justify-end">
         <div className="md:hidden">Last sync: </div>
         {children}
       </div>

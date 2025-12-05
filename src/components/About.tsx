@@ -15,7 +15,7 @@ export const About = () => {
       }}
     >
       <ListContainer>
-        <div className="text-light-200 mx-5 flex flex-col justify-center">
+        <div className="text-foreground/80 mx-5 flex flex-col justify-center">
           <div className="my-5 flex justify-center">
             I have lots of large playlists. The normal shuffle function in
             Spotify has lots of issues documented all around the internet. But
@@ -41,7 +41,9 @@ export const About = () => {
             </ul>
           </div>
 
-          <h3 className="text-light-50 my-2 text-xl font-semibold">Approach</h3>
+          <h3 className="text-foreground my-2 text-xl font-semibold">
+            Approach
+          </h3>
           <ul>
             <li>
               The order of the artists based on most to least songs by the same

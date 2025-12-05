@@ -1,8 +1,8 @@
 import classNames from "classnames";
 
 export const ListHeader = ({ children }: { children: React.ReactNode }) => {
-  const color =
-    "to-surface-500/75 from-surface-400/25 text-light-50 bg-linear-to-t";
+  const color = "bg-card text-card-foreground";
+
   return (
     <div
       className={classNames(

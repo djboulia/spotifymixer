@@ -8,7 +8,7 @@ export const ListContainer = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="bg-surface-500 text-light-50 rounded-lg">
+    <div className="bg-card text-card-foreground rounded-lg">
       {header && <>{header}</>}
       <div
         className={classNames(

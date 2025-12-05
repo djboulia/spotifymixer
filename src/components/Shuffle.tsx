@@ -130,12 +130,16 @@ export const Shuffle = ({
       <ListContainer
         header={
           <ListHeader>
-            <div className="flex w-[100px] justify-center">Action</div>
+            <div className="flex w-[100px] justify-center font-bold">
+              Action
+            </div>
             <div className="w-10" />
-            <div className="flex w-[100px] justify-start md:w-[200px]">
+            <div className="flex w-[100px] justify-start font-bold md:w-[200px]">
               Playlist
             </div>
-            <div className="flex w-[50px] justify-end md:w-[100px]">Songs</div>
+            <div className="flex w-[50px] justify-end font-bold md:w-[100px]">
+              Songs
+            </div>
           </ListHeader>
         }
       >
@@ -153,10 +157,10 @@ export const Shuffle = ({
             <div className="flex flex-col overflow-hidden rounded-md">
               <PlaylistImage img={playlist.img} alt={playlist.name} />
             </div>
-            <div className="text-light-200 flex w-[100px] justify-start md:w-[200px]">
+            <div className="text-foreground/75 flex w-[100px] justify-start md:w-[200px]">
               {playlist.name}
             </div>
-            <div className="text-light-200 flex w-[50px] justify-end md:w-[100px]">
+            <div className="text-foreground/75 flex w-[50px] justify-end md:w-[100px]">
               {playlist.total}
             </div>
           </PlaylistRow>

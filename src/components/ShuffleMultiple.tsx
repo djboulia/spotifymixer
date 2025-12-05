@@ -185,10 +185,12 @@ export const ShuffleMultiple = ({
             <div className="flex w-[200px] flex-col items-center overflow-hidden px-2">
               <PlaylistImage img={playlist.img} alt={playlist.name} />
             </div>
-            <div className="flex w-[200px] grow justify-start">
+            <div className="text-foreground/75 flex w-[200px] grow justify-start">
               {playlist.name}
             </div>
-            <div className="flex w-[100px] justify-end">{playlist.total}</div>
+            <div className="text-foreground/75 flex w-[100px] justify-end">
+              {playlist.total}
+            </div>
           </PlaylistRow>
         ))}
       </ListContainer>
