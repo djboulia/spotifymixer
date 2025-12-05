@@ -20,16 +20,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
       {/*
        * Suppress hydration warning for theme switching to avoid nextjs hydration mismatch.
        * Only applies one level deep, so this wwon't suppress hydraation errors in the rest of the app
        * https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
        */}
-      <body
-        className="text-foreground bg-background font-sans"
-        suppressHydrationWarning
-      >
+      <body className="text-foreground bg-background font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

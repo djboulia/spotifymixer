@@ -18,6 +18,7 @@ import { ListHeader } from "./base/ListHeader";
 import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
 import { AlertError } from "./base/AlertError";
+import { Checkbox } from "./ui/checkbox";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };
 
@@ -173,11 +174,11 @@ export const ShuffleMultiple = ({
         {playlistsChecked.map((playlist) => (
           <PlaylistRow key={playlist.id}>
             <div className="flex w-[50px] justify-center">
-              <input
-                type="checkbox"
-                checked={playlist.checked ?? false}
-                onChange={(e) => {
-                  playlist.checked = e.target.checked;
+              <Checkbox
+                defaultChecked={playlist.checked ?? false}
+                onCheckedChange={(checked) => {
+                  console.log("checkbox clicked for playlist: " + checked);
+                  playlist.checked = checked === true;
                   setPlaylistsChecked([...playlistsChecked]);
                 }}
               />
