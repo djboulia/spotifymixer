@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
+import { ThemeProvider } from "~/components/ThemeProvider";
 import { Geist } from "next/font/google";
 import AuthProvider from "~/components/auth/AuthProvider";
 
@@ -20,8 +21,23 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`}>
-      <body className="text-light-50 bg-dark-950 font-sans">
-        <AuthProvider>{children}</AuthProvider>
+      {/*
+       * Suppress hydration warning for theme switching to avoid nextjs hydration mismatch.
+       * Only applies one level deep, so this wwon't suppress hydraation errors in the rest of the app
+       * https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
+       */}
+      <body
+        className="text-light-50 bg-dark-950 font-sans"
+        suppressHydrationWarning
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
