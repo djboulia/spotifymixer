@@ -9,15 +9,15 @@ import type {
   MultipleShuffleProgressStatus,
   MixerCategoryStats,
 } from "~/models/shuffle";
-import { Alert } from "./base/Alert";
 import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
-import { Button } from "./base/Button";
+import { Button } from "./ui/button";
 import { PlaylistImage } from "./shuffle/PlaylistImage";
 import { PlaylistRow } from "./shuffle/PlaylistRow";
 import { ListContainer } from "./base/ListContainer";
 import { ListHeader } from "./base/ListHeader";
 import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
+import { AlertError } from "./base/AlertError";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };
 
@@ -142,7 +142,7 @@ export const ShuffleMultiple = ({
 
     return (
       <div>
-        <Alert severity="error" message={errMsg} />
+        <AlertError message={errMsg} />
       </div>
     );
   }
@@ -163,8 +163,9 @@ export const ShuffleMultiple = ({
                 onClick={() => {
                   shuffleMultiple();
                 }}
-                label="Shuffle Selected"
-              />
+              >
+                Shuffle Selected
+              </Button>
             </div>
           </ListHeader>
         }

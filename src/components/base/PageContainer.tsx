@@ -1,4 +1,5 @@
 import { NavMenu } from "./NavMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { Title } from "./Title";
 
 export const PageContainer = ({
@@ -11,10 +12,13 @@ export const PageContainer = ({
   onRouteChange?: (path: string) => void;
 }) => {
   return (
-    <div className="text-surface-100 max-w-7xl md:mx-20">
+    <div className="max-w-7xl md:mx-20">
       <div className="flex flex-row justify-between">
         <Title>{title}</Title>
-        <NavMenu onNavigate={onRouteChange} />
+        <div className="flex flex-row items-center gap-4">
+          <ThemeToggle />
+          <NavMenu onNavigate={onRouteChange} />
+        </div>
       </div>
 
       {children}

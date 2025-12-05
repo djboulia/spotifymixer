@@ -1,5 +1,5 @@
 import type { MixerCategoryStats } from "~/models/shuffle";
-import { Alert } from "~/components/base/Alert";
+import { AlertInfo } from "../base/AlertInfo";
 
 export const ProgressStats = ({
   categories,
@@ -10,7 +10,7 @@ export const ProgressStats = ({
   const noSingles = categories.filter((cat) => cat.category != "[singles]");
 
   if (!categories || categories?.length === 0) {
-    return <Alert severity="info" message="Loading categories..." />;
+    return <AlertInfo message="Loading categories..." />;
   }
 
   if (noSingles.length === 0) {

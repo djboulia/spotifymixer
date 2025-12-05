@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { Progress } from "~/components/ui/progress";
+import { AlertError } from "~/components/base/AlertError";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-  title: "Example/ProgressBar",
-  component: Progress,
+  title: "Example/Alert",
+  component: AlertError,
   parameters: {
     // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
     layout: "centered",
@@ -14,36 +14,17 @@ const meta = {
   tags: ["autodocs"],
   // More on argTypes: https://storybook.js.org/docs/api/argtypes
   argTypes: {
-    value: { control: "number" },
-    className: { control: "text" },
+    message: { control: "text" },
   },
-} satisfies Meta<typeof Progress>;
+} satisfies Meta<typeof AlertError>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 
-export const Zero: Story = {
+export const Error: Story = {
   args: {
-    value: 0,
-  },
-};
-
-export const Half: Story = {
-  args: {
-    value: 50,
-  },
-};
-
-export const Complete: Story = {
-  args: {
-    value: 100,
-  },
-};
-
-export const Undefined: Story = {
-  args: {
-    value: undefined,
+    message: `This is an error  alert`,
   },
 };

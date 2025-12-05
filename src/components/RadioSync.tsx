@@ -3,7 +3,7 @@
 import { useState } from "react";
 import * as SpotifyApi from "~/app/server-actions/spotify";
 import type { SpotifyTrackWithSearch } from "~/models/playlist";
-import { Button } from "./base/Button";
+import { Button } from "./ui/button";
 import { ListContainer } from "./base/ListContainer";
 import { ListHeader } from "./base/ListHeader";
 import { RadioRow } from "./sync/RadioRow";
@@ -135,10 +135,11 @@ export default function RadioSync() {
           onClick={() => {
             void syncStation(radioStation, numTracks);
           }}
-          label={radioStation.name}
           disabled={loading}
           className="w-[300px] min-w-[300px]"
-        />
+        >
+          {radioStation.name}
+        </Button>
         <StationSyncResults results={radioStation.results} />
       </RadioRow>
     );
@@ -180,10 +181,11 @@ export default function RadioSync() {
         <div className="flex flex-row items-center justify-center py-6">
           <Button
             className="w-[300px]"
-            label="Sync All"
             disabled={loading}
             onClick={() => void syncAll()}
-          />
+          >
+            Sync All
+          </Button>
         </div>
       </ListContainer>
     </PageContainer>

@@ -4,7 +4,7 @@ import type {
   MultipleShuffleProgressStatus,
 } from "~/models/shuffle";
 import { Modal } from "~/components/base/Modal";
-import { ProgressBar } from "~/components/base/ProgressBar";
+import { Progress } from "../ui/progress";
 import { ProgressStats } from "./ProgressStats";
 
 export const ShuffleProgressModal = ({
@@ -35,7 +35,7 @@ export const ShuffleProgressModal = ({
     >
       <>
         <div className="m-4">
-          <ProgressBar percentComplete={percentComplete} />
+          <Progress value={percentComplete} />
         </div>
 
         <ProgressStats categories={categories} />

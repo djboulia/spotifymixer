@@ -27,7 +27,7 @@ export default function RootLayout({
        * https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
        */}
       <body
-        className="text-light-50 bg-dark-950 font-sans"
+        className="text-foreground bg-background font-sans"
         suppressHydrationWarning
       >
         <ThemeProvider

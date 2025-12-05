@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useEffect, useState } from "react";
 
 import { Modal } from "~/components/base/Modal";
-import { ProgressBar } from "~/components/base/ProgressBar";
+import { Progress } from "~/components/ui/progress";
 
 // wrap the modal so we can implement isOpen prop easily
 const ModalWrapper = ({
@@ -34,7 +34,7 @@ const ComplexBodyContent = () => {
         This is an example of a more complex modal body, including a progress
         bar.
       </p>
-      <ProgressBar percentComplete={70} />
+      <Progress value={70} />
       <p>Additional content can go here.</p>
     </div>
   );

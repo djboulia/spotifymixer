@@ -1,5 +1,5 @@
-import { Alert } from "./base/Alert";
+import { AlertError } from "./base/AlertError";
 
 export const ErrorPage = ({ message }: { message: string }) => {
-  return <Alert severity="error" message={message} />;
+  return <AlertError message={message} />;
 };
