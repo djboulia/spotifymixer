@@ -1,7 +1,7 @@
 "use client";
 
-import { PageContainer } from "./ui/PageContainer";
-import { ListContainer } from "./ui/ListContainer";
+import { PageContainer } from "./base/PageContainer";
+import { ListContainer } from "./base/ListContainer";
 import { useRouter } from "next/navigation";
 
 export const About = () => {

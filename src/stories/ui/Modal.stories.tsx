@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useEffect, useState } from "react";
 
-import { Modal } from "~/components/ui/Modal";
-import { ProgressBar } from "~/components/ui/ProgressBar";
+import { Modal } from "~/components/base/Modal";
+import { ProgressBar } from "~/components/base/ProgressBar";
 
 // wrap the modal so we can implement isOpen prop easily
 const ModalWrapper = ({

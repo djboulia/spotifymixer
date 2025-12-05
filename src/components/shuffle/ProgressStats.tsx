@@ -1,5 +1,5 @@
 import type { MixerCategoryStats } from "~/models/shuffle";
-import { Alert } from "~/components/ui/Alert";
+import { Alert } from "~/components/base/Alert";
 
 export const ProgressStats = ({
   categories,

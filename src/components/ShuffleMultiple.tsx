@@ -9,14 +9,14 @@ import type {
   MultipleShuffleProgressStatus,
   MixerCategoryStats,
 } from "~/models/shuffle";
-import { Alert } from "./ui/Alert";
+import { Alert } from "./base/Alert";
 import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
-import { Button } from "./ui/Button";
+import { Button } from "./base/Button";
 import { PlaylistImage } from "./shuffle/PlaylistImage";
 import { PlaylistRow } from "./shuffle/PlaylistRow";
-import { ListContainer } from "./ui/ListContainer";
-import { ListHeader } from "./ui/ListHeader";
-import { PageContainer } from "./ui/PageContainer";
+import { ListContainer } from "./base/ListContainer";
+import { ListHeader } from "./base/ListHeader";
+import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };

@@ -1,4 +1,4 @@
-import { Button } from "~/components/ui/Button";
+import { Button } from "~/components/base/Button";
 import "./header.css";
 
 type User = {

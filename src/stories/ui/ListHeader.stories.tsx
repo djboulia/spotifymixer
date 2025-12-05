@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { ListHeader } from "~/components/ui/ListHeader";
-import { Title } from "~/components/ui/Title";
+import { ListHeader } from "~/components/base/ListHeader";
+import { Title } from "~/components/base/Title";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
