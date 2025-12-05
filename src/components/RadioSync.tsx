@@ -9,6 +9,7 @@ import { ListHeader } from "./ui/ListHeader";
 import { RadioRow } from "./sync/RadioRow";
 import { StationSyncResults } from "./sync/StationSyncResults";
 import { PageContainer } from "./ui/PageContainer";
+import { useRouter } from "next/navigation";
 
 type RadioStation = {
   name: string; // Station Name which shows on the button
@@ -79,6 +80,8 @@ const radioStations: RadioStationResults[] = [
 ];
 
 export default function RadioSync() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [radioStationResults, setRadioStationResults] =
@@ -142,7 +145,10 @@ export default function RadioSync() {
   };
 
   return (
-    <PageContainer title="Sync Radio Station with Playlist">
+    <PageContainer
+      title="Sync Radio Station with Playlist"
+      onRouteChange={(path) => router.push(path)}
+    >
       <ListContainer
         header={
           <ListHeader>
@@ -170,16 +176,16 @@ export default function RadioSync() {
         {radioStationResults.map((station) => (
           <StationRow key={station.stationId} radioStation={station} />
         ))}
-      </ListContainer>
 
-      <div className="flex flex-row items-center justify-center">
-        <Button
-          className="w-[300px]"
-          label="Sync All"
-          disabled={loading}
-          onClick={() => void syncAll()}
-        />
-      </div>
+        <div className="flex flex-row items-center justify-center py-6">
+          <Button
+            className="w-[300px]"
+            label="Sync All"
+            disabled={loading}
+            onClick={() => void syncAll()}
+          />
+        </div>
+      </ListContainer>
     </PageContainer>
   );
 }

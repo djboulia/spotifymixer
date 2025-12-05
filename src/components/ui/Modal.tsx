@@ -15,7 +15,7 @@ export const Modal = ({
     <BaseModal
       isOpen={isOpen}
       ariaHideApp={false}
-      className="bg-spotify-950 text-spotify-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-lg shadow-xl"
+      className="bg-surface-500 text-light-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-lg shadow-xl"
       overlayClassName="fixed inset-0 bg-black/75 bgflex items-center justify-center"
       shouldCloseOnOverlayClick={true}
       shouldCloseOnEsc={true}
@@ -26,7 +26,7 @@ export const Modal = ({
     >
       <h3
         id="dialog-title"
-        className="bg-spotify-900 rounded-tl-lg rounded-tr-lg py-2 text-center text-lg font-semibold"
+        className="bg-surface-400/75 rounded-tl-lg rounded-tr-lg py-2 text-center text-lg font-semibold"
       >
         {title}
       </h3>

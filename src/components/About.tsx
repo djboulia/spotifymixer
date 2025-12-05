@@ -1,11 +1,21 @@
+"use client";
+
 import { PageContainer } from "./ui/PageContainer";
 import { ListContainer } from "./ui/ListContainer";
+import { useRouter } from "next/navigation";
 
 export const About = () => {
+  const router = useRouter();
+
   return (
-    <PageContainer title="About Spotify Mixer">
+    <PageContainer
+      title="About Spotify Mixer"
+      onRouteChange={(path) => {
+        router.push(path);
+      }}
+    >
       <ListContainer>
-        <div className="mx-5 flex flex-col justify-center">
+        <div className="text-light-200 mx-5 flex flex-col justify-center">
           <div className="my-5 flex justify-center">
             I have lots of large playlists. The normal shuffle function in
             Spotify has lots of issues documented all around the internet. But
@@ -31,7 +41,7 @@ export const About = () => {
             </ul>
           </div>
 
-          <h3 className="my-2 text-xl font-semibold">Approach</h3>
+          <h3 className="text-light-50 my-2 text-xl font-semibold">Approach</h3>
           <ul>
             <li>
               The order of the artists based on most to least songs by the same

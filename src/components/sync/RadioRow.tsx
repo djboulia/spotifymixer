@@ -3,7 +3,7 @@
  */
 export const RadioRow = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="border-spotify-800/50 flex flex-col items-center justify-between border-b py-2 md:flex-row">
+    <div className="border-surface-300 flex flex-col items-center justify-between border-b py-2 md:flex-row">
       {children}
     </div>
   );

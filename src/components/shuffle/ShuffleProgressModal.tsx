@@ -4,7 +4,7 @@ import type {
   MultipleShuffleProgressStatus,
 } from "~/models/shuffle";
 import { Modal } from "~/components/ui/Modal";
-import { ProgressBar } from "./ui/ProgressBar";
+import { ProgressBar } from "~/components/ui/ProgressBar";
 import { ProgressStats } from "./ProgressStats";
 
 export const ShuffleProgressModal = ({

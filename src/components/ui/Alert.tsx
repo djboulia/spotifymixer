@@ -10,8 +10,8 @@ export const Alert = ({
 }) => {
   const severityClass =
     severity === "error"
-      ? "relative mb-4 rounded border border-spotify-400/75 bg-spotify-100 px-4 py-3 text-red-700"
-      : "relative mb-4 rounded border border-spotify-400/75 bg-spotify-100 px-4 py-3 text-blue-700";
+      ? "relative mb-4 rounded border border-danger-50/75 bg-surface-300 px-4 py-3 text-danger-50"
+      : "relative mb-4 rounded border border-info-50/75 bg-surface-300 px-4 py-3 text-info-50";
 
   const AlertIcon = severity === "info" ? FaCircleInfo : FaCircleExclamation;
 

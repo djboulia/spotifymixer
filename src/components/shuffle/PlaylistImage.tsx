@@ -15,6 +15,6 @@ export const PlaylistImage = ({
       className="rounded-md"
     />
   ) : (
-    <div className="border-spotify-700 h-10 w-10 rounded-md border"></div>
+    <div className="border-surface-100 h-10 w-10 rounded-md border"></div>
   );
 };

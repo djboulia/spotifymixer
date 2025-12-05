@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import type { Playlist } from "~/models/playlist";
 import type { User } from "~/models/user";
@@ -16,6 +17,7 @@ import { PlaylistRow } from "./shuffle/PlaylistRow";
 import { ListContainer } from "./ui/ListContainer";
 import { ListHeader } from "./ui/ListHeader";
 import { PageContainer } from "./ui/PageContainer";
+import { useRouter } from "next/navigation";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };
 
@@ -26,6 +28,7 @@ export const ShuffleMultiple = ({
   user?: User;
   playlists: Playlist[];
 }) => {
+  const router = useRouter();
   const [inProgress, setInProgress] = useState(false);
   const [playlistsChecked, setPlaylistsChecked] =
     useState<PlaylistWithChecks[]>(playlists);
@@ -145,7 +148,10 @@ export const ShuffleMultiple = ({
   }
 
   return (
-    <PageContainer title={`Playlists for ${user?.name}`}>
+    <PageContainer
+      title={`Playlists for ${user?.name}`}
+      onRouteChange={(path) => router.push(path)}
+    >
       {inProgress && progressIndicator}
 
       <ListContainer

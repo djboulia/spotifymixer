@@ -8,12 +8,12 @@ export const ListContainer = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="bg-spotify-950 rounded-lg">
+    <div className="bg-surface-500 text-light-50 rounded-lg">
       {header && <>{header}</>}
       <div
         className={classNames(
-          "flex flex-col p-4",
-          header ? "m-2 md:m-10" : undefined,
+          "flex flex-col px-4 py-2",
+          header ? "mx-2 md:mx-10" : undefined,
         )}
       >
         {children}

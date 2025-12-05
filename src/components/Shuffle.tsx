@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import type { Playlist } from "~/models/playlist";
 import type { User } from "~/models/user";
@@ -16,6 +17,7 @@ import { PlaylistRow } from "./shuffle/PlaylistRow";
 import { ListContainer } from "./ui/ListContainer";
 import { ListHeader } from "./ui/ListHeader";
 import { PageContainer } from "./ui/PageContainer";
+import { useRouter } from "next/navigation";
 
 export const Shuffle = ({
   user,
@@ -24,6 +26,7 @@ export const Shuffle = ({
   user?: User;
   playlists: Playlist[];
 }) => {
+  const router = useRouter();
   const [inProgress, setInProgress] = useState(false);
   const [percentComplete, setPercentComplete] = useState(0);
   const [playListDetails, setPlayListDetails] = useState<PlayListDetails>({
@@ -118,7 +121,10 @@ export const Shuffle = ({
   }
 
   return (
-    <PageContainer title={`Playlists for ${user?.name}`}>
+    <PageContainer
+      title={`Playlists for ${user?.name}`}
+      onRouteChange={(path) => router.push(path)}
+    >
       {inProgress && progressIndicator}
 
       <ListContainer
@@ -146,10 +152,10 @@ export const Shuffle = ({
             <div className="flex flex-col overflow-hidden rounded-md">
               <PlaylistImage img={playlist.img} alt={playlist.name} />
             </div>
-            <div className="flex w-[100px] justify-start md:w-[200px]">
+            <div className="text-light-200 flex w-[100px] justify-start md:w-[200px]">
               {playlist.name}
             </div>
-            <div className="flex w-[50px] justify-end md:w-[100px]">
+            <div className="text-light-200 flex w-[50px] justify-end md:w-[100px]">
               {playlist.total}
             </div>
           </PlaylistRow>
