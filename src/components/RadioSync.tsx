@@ -10,6 +10,7 @@ import { RadioRow } from "./sync/RadioRow";
 import { StationSyncResults } from "./sync/StationSyncResults";
 import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
+import { SyncTracksSelect } from "./sync/SyncTracksSelect";
 
 type RadioStation = {
   name: string; // Station Name which shows on the button
@@ -154,17 +155,8 @@ export default function RadioSync() {
         header={
           <ListHeader>
             <div className="flex w-full flex-col items-center justify-center gap-4">
-              <div className="flex flex-row items-center justify-between gap-4">
-                <div>Tracks to Sync:</div>
-                <div>
-                  <input
-                    className="w-16"
-                    type="number"
-                    value={numTracks}
-                    onChange={(e) => setNumTracks(Number(e.target.value))}
-                  />
-                </div>
-              </div>
+              <SyncTracksSelect value={numTracks} onChange={setNumTracks} />
+
               <div className="hidden w-full flex-row justify-end md:flex">
                 <div className="m-4">
                   <b>Last sync {lastSync?.toLocaleString()}</b>
