@@ -25,7 +25,7 @@ export const ShuffleProgressModal = ({
       return "";
     }
 
-    return `${status.current} of ${status.total}`;
+    return `(${status.current} of ${status.total})`;
   };
 
   return (

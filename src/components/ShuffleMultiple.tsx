@@ -80,6 +80,7 @@ export const ShuffleMultiple = ({
         for (const playlist of playlistsChecked) {
           playlist.checked = false;
         }
+        setPlaylistsChecked([...playlistsChecked]);
 
         // complete - stop in progress indicator and clear timeout
         setInProgress(false);
@@ -175,7 +176,7 @@ export const ShuffleMultiple = ({
           <PlaylistRow key={playlist.id}>
             <div className="flex w-[50px] justify-center">
               <Checkbox
-                defaultChecked={playlist.checked ?? false}
+                checked={playlist.checked ?? false}
                 onCheckedChange={(checked) => {
                   console.log("checkbox clicked for playlist: " + checked);
                   playlist.checked = checked === true;

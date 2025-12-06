@@ -1,4 +1,5 @@
-import BaseModal from "react-modal";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
 
 export const Modal = ({
   title,
@@ -12,33 +13,24 @@ export const Modal = ({
   children: React.ReactNode;
 }) => {
   return (
-    <BaseModal
-      isOpen={isOpen}
-      ariaHideApp={false}
-      className="bg-popover text-popover-foreground absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-lg shadow-xl"
-      overlayClassName="fixed inset-0 bg-black/75 bgflex items-center justify-center"
-      shouldCloseOnOverlayClick={true}
-      shouldCloseOnEsc={true}
-      onRequestClose={() => {
-        console.log("Modal request close");
-        onClose?.();
-      }}
-    >
-      <h3
-        id="dialog-title"
-        className="bg-popover/75 rounded-tl-lg rounded-tr-lg py-2 text-center text-lg font-semibold"
-      >
-        {title}
-      </h3>
-
-      <div
-        tabIndex={0}
-        className="flex min-h-full min-w-[350px] flex-col items-center justify-center p-6 focus:outline-none sm:m-0 sm:items-center md:min-w-[400px]"
-      >
-        <div className="flex flex-col justify-center px-4 pt-5 pb-4">
-          {children}
-        </div>
-      </div>
-    </BaseModal>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="[&>button:last-child]:hidden">
+        <DialogHeader>
+          <DialogTitle>
+            <div className="py-2 text-center text-lg font-semibold">
+              {title}
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+        <div
+          tabIndex={0}
+          className="flex min-h-full min-w-[350px] flex-col items-center justify-center p-6 focus:outline-none sm:m-0 sm:items-center md:min-w-[400px]"
+        >
+          <div className="flex flex-col justify-center px-4 pt-5 pb-4">
+            {children}
+          </div>
+        </div>{" "}
+      </DialogContent>
+    </Dialog>
   );
 };
