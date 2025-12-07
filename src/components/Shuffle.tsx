@@ -10,7 +10,6 @@ import type {
   MixerCategoryStats,
 } from "~/models/shuffle";
 import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
-import { Button } from "./ui/button";
 import { PlaylistImage } from "./shuffle/PlaylistImage";
 import { PlaylistRow } from "./shuffle/PlaylistRow";
 import { ListContainer } from "./base/ListContainer";
@@ -18,6 +17,7 @@ import { ListHeader } from "./base/ListHeader";
 import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
 import { AlertError } from "./base/AlertError";
+import { ShuffleButton } from "./base/ShuffleButton";
 
 export const Shuffle = ({
   user,
@@ -146,13 +146,13 @@ export const Shuffle = ({
         {playlists.map((playlist) => (
           <PlaylistRow key={playlist.id}>
             <div className="flex w-[100px] justify-center">
-              <Button
+              <ShuffleButton
+                label="Shuffle"
+                shuffling={inProgress}
                 onClick={() => {
                   shuffle(playlist.id);
                 }}
-              >
-                Shuffle
-              </Button>
+              />
             </div>
             <div className="flex flex-col overflow-hidden rounded-md">
               <PlaylistImage img={playlist.img} alt={playlist.name} />

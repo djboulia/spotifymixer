@@ -6,6 +6,7 @@ import type {
 import { Modal } from "~/components/base/Modal";
 import { Progress } from "../ui/progress";
 import { ProgressStats } from "./ProgressStats";
+import { Spinner } from "../ui/spinner";
 
 export const ShuffleProgressModal = ({
   playlist,
@@ -35,7 +36,13 @@ export const ShuffleProgressModal = ({
     >
       <>
         <div className="m-4">
-          <Progress value={percentComplete} />
+          {percentComplete === 0 ? (
+            <div className="flex flex-row justify-center">
+              <Spinner />
+            </div>
+          ) : (
+            <Progress value={percentComplete} className="min-w-[150px]" />
+          )}
         </div>
 
         <ProgressStats categories={categories} />

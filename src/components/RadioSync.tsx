@@ -3,7 +3,6 @@
 import { useState } from "react";
 import * as SpotifyApi from "~/app/server-actions/spotify";
 import type { SpotifyTrackWithSearch } from "~/models/playlist";
-import { Button } from "./ui/button";
 import { ListContainer } from "./base/ListContainer";
 import { ListHeader } from "./base/ListHeader";
 import { RadioRow } from "./sync/RadioRow";
@@ -11,6 +10,7 @@ import { StationSyncResults } from "./sync/StationSyncResults";
 import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
 import { SyncTracksSelect } from "./sync/SyncTracksSelect";
+import { SyncButton } from "./base/SyncButton";
 
 type RadioStation = {
   name: string; // Station Name which shows on the button
@@ -132,15 +132,16 @@ export default function RadioSync() {
   }) => {
     return (
       <RadioRow>
-        <Button
-          onClick={() => {
-            void syncStation(radioStation, numTracks);
-          }}
-          disabled={loading}
-          className="w-[300px] min-w-[300px]"
-        >
+        <div className="flex flex-row items-center justify-between gap-4">
+          <SyncButton
+            syncing={loading}
+            label="Sync"
+            onClick={() => {
+              void syncStation(radioStation, numTracks);
+            }}
+          />
           {radioStation.name}
-        </Button>
+        </div>
         <StationSyncResults results={radioStation.results} />
       </RadioRow>
     );
@@ -171,13 +172,12 @@ export default function RadioSync() {
         ))}
 
         <div className="flex flex-row items-center justify-center py-6">
-          <Button
+          <SyncButton
             className="w-[300px]"
-            disabled={loading}
+            syncing={loading}
             onClick={() => void syncAll()}
-          >
-            Sync All
-          </Button>
+            label="Sync All"
+          />
         </div>
       </ListContainer>
     </PageContainer>

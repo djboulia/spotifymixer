@@ -10,7 +10,6 @@ import type {
   MixerCategoryStats,
 } from "~/models/shuffle";
 import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
-import { Button } from "./ui/button";
 import { PlaylistImage } from "./shuffle/PlaylistImage";
 import { PlaylistRow } from "./shuffle/PlaylistRow";
 import { ListContainer } from "./base/ListContainer";
@@ -19,6 +18,7 @@ import { PageContainer } from "./base/PageContainer";
 import { useRouter } from "next/navigation";
 import { AlertError } from "./base/AlertError";
 import { Checkbox } from "./ui/checkbox";
+import { ShuffleButton } from "./base/ShuffleButton";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };
 
@@ -160,14 +160,14 @@ export const ShuffleMultiple = ({
         header={
           <ListHeader>
             <div className="flex w-full flex-row items-center justify-center">
-              <Button
-                disabled={inProgress || nothingSelected()}
+              <ShuffleButton
+                disabled={nothingSelected()}
+                shuffling={inProgress}
                 onClick={() => {
                   shuffleMultiple();
                 }}
-              >
-                Shuffle Selected
-              </Button>
+                label="Shuffle Selected"
+              />
             </div>
           </ListHeader>
         }
