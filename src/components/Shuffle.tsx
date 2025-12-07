@@ -148,7 +148,7 @@ export const Shuffle = ({
             <div className="flex w-[100px] justify-center">
               <ShuffleButton
                 label="Shuffle"
-                shuffling={inProgress}
+                loading={inProgress}
                 onClick={() => {
                   shuffle(playlist.id);
                 }}

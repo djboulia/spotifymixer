@@ -4,20 +4,20 @@ import { IconLoadingeButton } from "./IconLoadingButton";
 export const ShuffleButton = ({
   label,
   disabled,
-  shuffling,
+  loading,
   className,
   onClick,
 }: {
   label: string;
   disabled?: boolean;
-  shuffling: boolean;
+  loading: boolean;
   className?: string;
   onClick?: () => void;
 }) => {
   return (
     <IconLoadingeButton
       disabled={disabled}
-      loading={shuffling}
+      loading={loading}
       onClick={onClick}
       icon={<ShuffleIcon />}
       label={label}

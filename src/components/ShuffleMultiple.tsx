@@ -162,7 +162,7 @@ export const ShuffleMultiple = ({
             <div className="flex w-full flex-row items-center justify-center">
               <ShuffleButton
                 disabled={nothingSelected()}
-                shuffling={inProgress}
+                loading={inProgress}
                 onClick={() => {
                   shuffleMultiple();
                 }}

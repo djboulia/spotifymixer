@@ -4,20 +4,20 @@ import { IconLoadingeButton } from "./IconLoadingButton";
 export const SyncButton = ({
   label,
   disabled,
-  syncing,
+  loading,
   className,
   onClick,
 }: {
   label: string;
   disabled?: boolean;
-  syncing: boolean;
+  loading: boolean;
   className?: string;
   onClick?: () => void;
 }) => {
   return (
     <IconLoadingeButton
       disabled={disabled}
-      loading={syncing}
+      loading={loading}
       onClick={onClick}
       icon={<RefreshCcwIcon />}
       label={label}
