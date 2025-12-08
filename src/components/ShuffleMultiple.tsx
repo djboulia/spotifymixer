@@ -159,7 +159,7 @@ export const ShuffleMultiple = ({
       <ListContainer
         header={
           <ListHeader sticky={true}>
-            <div className="flex w-full flex-row items-center justify-center">
+            <div className="border-foreground/20 flex w-full flex-row items-center justify-center border-b pb-10 md:mx-4">
               <ShuffleButton
                 disabled={nothingSelected()}
                 loading={inProgress}

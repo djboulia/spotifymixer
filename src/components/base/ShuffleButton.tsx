@@ -19,7 +19,7 @@ export const ShuffleButton = ({
       disabled={disabled}
       loading={loading}
       onClick={onClick}
-      icon={<ShuffleIcon />}
+      icon={<ShuffleIcon className="text-highlight" />}
       label={label}
       className={className}
     />

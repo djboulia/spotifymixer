@@ -19,7 +19,7 @@ export const NavMenu = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">
-            <FaSpotify className="text-foreground cursor-pointer" />
+            <FaSpotify className="text-highlight cursor-pointer" />
             <span className="sr-only">More Options</span>
           </Button>
         </DropdownMenuTrigger>

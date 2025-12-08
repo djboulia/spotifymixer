@@ -19,7 +19,7 @@ export const SyncButton = ({
       disabled={disabled}
       loading={loading}
       onClick={onClick}
-      icon={<RefreshCcwIcon />}
+      icon={<RefreshCcwIcon className="text-highlight" />}
       label={label}
       className={className}
     />

@@ -132,7 +132,7 @@ export default function RadioSync() {
   }) => {
     return (
       <RadioRow>
-        <div className="flex flex-row items-center justify-between gap-4">
+        <div className="flex w-full grow flex-row items-center justify-start gap-4">
           <SyncButton
             loading={loading}
             label="Sync"

@@ -7,7 +7,7 @@ export const ListHeader = ({
   sticky?: boolean;
   children: React.ReactNode;
 }) => {
-  const color = "bg-card text-card-foreground";
+  const color = "bg-card text-card-foreground ";
 
   return (
     <div
@@ -15,7 +15,7 @@ export const ListHeader = ({
         color,
         sticky ? "sticky top-0 z-10" : "",
         "flex flex-row items-center justify-between",
-        "px-10 py-6",
+        "px-6 py-6 md:px-10",
         "rounded-tl-lg rounded-tr-lg",
       )}
     >
