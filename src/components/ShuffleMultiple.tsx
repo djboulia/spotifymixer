@@ -1,14 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Playlist } from "~/models/playlist";
 import type { User } from "~/models/user";
-import * as Spotify from "~/app/server-actions/spotify";
-import type { PlayListDetails } from "~/models/playlist";
-import type {
-  MultipleShuffleProgressStatus,
-  MixerCategoryStats,
-} from "~/models/shuffle";
 import { ShuffleProgressModal } from "./shuffle/ShuffleProgressModal";
 import { PlaylistImage } from "./shuffle/PlaylistImage";
 import { PlaylistRow } from "./shuffle/PlaylistRow";
@@ -19,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { AlertError } from "./base/AlertError";
 import { Checkbox } from "./ui/checkbox";
 import { ShuffleButton } from "./base/ShuffleButton";
+import { useProgressIndicator } from "~/hooks/useProgressIndicator";
 
 type PlaylistWithChecks = Playlist & { checked?: boolean };
 
@@ -30,93 +25,32 @@ export const ShuffleMultiple = ({
   playlists: Playlist[];
 }) => {
   const router = useRouter();
-  const [inProgress, setInProgress] = useState(false);
   const [playlistsChecked, setPlaylistsChecked] =
     useState<PlaylistWithChecks[]>(playlists);
-  const [percentComplete, setPercentComplete] = useState(0);
-  const [playListDetails, setPlayListDetails] = useState<PlayListDetails>({
-    name: "Play List",
-    img: "",
-  });
-  const [multipleStatus, setMultipleStatus] = useState<
-    MultipleShuffleProgressStatus | undefined
-  >(undefined);
-  const [categories, setCategories] = useState<MixerCategoryStats[]>([]);
-  const [errMsg, setErrMsg] = useState("");
 
-  // set a timer to monitor progress
-  const checkProgress = async () => {
-    try {
-      const result = await Spotify.shuffleProgress();
-      console.log("progress; ", result);
+  const {
+    inProgress,
+    percentComplete,
+    playListDetails,
+    multipleStatus,
+    categories,
+    errMsg,
+    shuffle,
+  } = useProgressIndicator();
 
-      if (result.inProgress) {
-        // update status
-        setInProgress(true);
-        if (result.shuffled === 0 || result.total === 0) {
-          setPercentComplete(0);
-        } else {
-          setPercentComplete((result.shuffled / result.total) * 100);
-        }
-
-        // update play list name
-        if (result.playList) {
-          setPlayListDetails(result.playList);
-        }
-
-        if (result.multiple) {
-          setMultipleStatus(result.multiple);
-        }
-
-        setCategories(result.categories);
-
-        // still in proogress, so set another time out to check again
-        setTimeout(() => {
-          console.log("In Timeout");
-          void checkProgress();
-        }, 1000);
-      } else {
-        // reset the checkboxes for the playlist
-        for (const playlist of playlistsChecked) {
-          playlist.checked = false;
-        }
-        setPlaylistsChecked([...playlistsChecked]);
-
-        // complete - stop in progress indicator and clear timeout
-        setInProgress(false);
-        clearTimeout(undefined);
+  useEffect(() => {
+    if (!inProgress) {
+      // reset the checkboxes for the playlist
+      for (const playlist of playlistsChecked) {
+        playlist.checked = false;
       }
-    } catch (error) {
-      console.log("error checking progress! ", error);
-      setErrMsg("Error communicating with server!");
+      setPlaylistsChecked([...playlistsChecked]);
     }
-  };
-
-  const startProgressTimer = function () {
-    setTimeout(() => {
-      console.log("In Timeout");
-      void checkProgress();
-    }, 1000);
-  };
-
-  const shuffleMultiple = function () {
-    const playListsIds: string[] = [];
-    for (const playlist of playlistsChecked) {
-      if (playlist.checked) {
-        playListsIds.push(playlist.id);
-      }
-    }
-
-    void Spotify.shuffleMultiple(playListsIds);
-
-    setInProgress(true);
-    setPercentComplete(0);
-    setPlayListDetails({ name: "Play List", img: "" });
-    setMultipleStatus(undefined);
-    setCategories([]);
-
-    startProgressTimer();
-  };
+    // if we add playlistsChecked to the dependency array, we get an infinite loop since
+    // we update it in the effect, whichi triggers the effect again. disable the lint rule for this line
+    //
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inProgress]);
 
   const nothingSelected = function () {
     console.log("nothingSelected called");
@@ -164,7 +98,14 @@ export const ShuffleMultiple = ({
                 disabled={nothingSelected()}
                 loading={inProgress}
                 onClick={() => {
-                  shuffleMultiple();
+                  const playListsIds: string[] = [];
+                  for (const playlist of playlistsChecked) {
+                    if (playlist.checked) {
+                      playListsIds.push(playlist.id);
+                    }
+                  }
+
+                  shuffle(playListsIds);
                 }}
                 label="Shuffle Selected"
               />
