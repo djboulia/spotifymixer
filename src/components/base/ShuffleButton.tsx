@@ -10,7 +10,7 @@ export const ShuffleButton = ({
 }: {
   label: string;
   disabled?: boolean;
-  loading: boolean;
+  loading?: boolean;
   className?: string;
   onClick?: () => void;
 }) => {

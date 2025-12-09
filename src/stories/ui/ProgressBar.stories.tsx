@@ -27,23 +27,27 @@ type Story = StoryObj<typeof meta>;
 export const Zero: Story = {
   args: {
     value: 0,
+    className: "w-20",
   },
 };
 
 export const Half: Story = {
   args: {
     value: 50,
+    className: "w-20",
   },
 };
 
 export const Complete: Story = {
   args: {
     value: 100,
+    className: "w-20",
   },
 };
 
 export const Undefined: Story = {
   args: {
     value: undefined,
+    className: "w-20",
   },
 };

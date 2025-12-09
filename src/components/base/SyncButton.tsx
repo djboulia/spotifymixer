@@ -10,7 +10,7 @@ export const SyncButton = ({
 }: {
   label: string;
   disabled?: boolean;
-  loading: boolean;
+  loading?: boolean;
   className?: string;
   onClick?: () => void;
 }) => {

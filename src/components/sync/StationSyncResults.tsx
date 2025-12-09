@@ -1,4 +1,5 @@
 import type { SpotifyTrackWithSearch } from "~/models/playlist";
+import { Spinner } from "../ui/spinner";
 
 export const StationSyncResults = ({
   results,
@@ -17,7 +18,9 @@ export const StationSyncResults = ({
   if (!results) {
     return (
       <LastSyncContainer>
-        <div>Loading...</div>
+        <div className="flex w-[145px] flex-row justify-center">
+          <Spinner />
+        </div>
       </LastSyncContainer>
     );
   }

@@ -134,7 +134,7 @@ export default function RadioSync() {
       <RadioRow>
         <div className="flex w-full grow flex-row items-center justify-start gap-4">
           <SyncButton
-            loading={loading}
+            disabled={loading}
             label="Sync"
             onClick={() => {
               void syncStation(radioStation, numTracks);
@@ -174,7 +174,7 @@ export default function RadioSync() {
         <div className="flex flex-row items-center justify-center py-6">
           <SyncButton
             className="w-[300px]"
-            loading={loading}
+            disabled={loading}
             onClick={() => void syncAll()}
             label="Sync All"
           />

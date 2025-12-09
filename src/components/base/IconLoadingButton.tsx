@@ -4,15 +4,15 @@ import { Spinner } from "../ui/spinner";
 export const IconLoadingeButton = ({
   label,
   icon,
-  disabled,
-  loading,
+  disabled = false,
+  loading = false,
   className,
   onClick,
 }: {
   label: string;
   icon: React.ReactNode;
   disabled?: boolean;
-  loading: boolean;
+  loading?: boolean;
   className?: string;
   onClick?: () => void;
 }) => {

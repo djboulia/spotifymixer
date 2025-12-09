@@ -15,6 +15,7 @@
   --color-light-50: #ffffff;
 
   /** Theme primary colors */
+  --color-primary-600: #286916;
   --color-primary-500: #3bbf17;
   --color-primary-400: #5bc73c;
   --color-primary-300: #74ce57;
@@ -24,7 +25,7 @@
 
   /** Theme surface colors */
   --color-surface-500: #131712;
-  --color-surface-400: #292d27;
+  --color-surface-400: #222520;
   --color-surface-300: #3f423e;
   --color-surface-200: #565a55;
   --color-surface-100: #8c8f8a;
@@ -98,7 +99,7 @@
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: var(--color-surface-500);
-  --highlight: #3bbf17;
+  --highlight: var(--color-primary-500);
   --card: oklch(1 0 0);
   --card-foreground: var(--color-surface-400);
   --popover: oklch(1 0 0);
@@ -135,7 +136,7 @@
 .dark {
   --background: var(--color-surface-500);
   --foreground: oklch(0.984 0.003 247.858);
-  --highlight: #126b02;
+  --highlight: var(--color-primary-600);
   --card: var(--color-surface-400);
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: var(--color-surface-300);
