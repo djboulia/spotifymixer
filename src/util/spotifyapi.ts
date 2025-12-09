@@ -1,5 +1,8 @@
 import SpotifyWebApi from "spotify-web-api-node";
-import { SpotifyAuthState, type SpotifyAuthSession } from "./spotifyauthstate";
+import {
+  SpotifyAuthState,
+  type SpotifyAuthSession,
+} from "./auth/spotifyauthstate";
 import * as fs from "fs";
 
 const SPOTIFY_URL = "https://accounts.spotify.com";

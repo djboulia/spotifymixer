@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { getSpotifyServerSession } from "~/util/spotifyauth";
+import { getSpotifyServerSession } from "~/util/auth/spotifyauth";
 import * as Spotify from "~/app/server-actions/spotify";
 import { ShuffleMultiple } from "~/components/ShuffleMultiple";
 import { ErrorPage } from "~/components/ErrorPage";

@@ -1,5 +1,5 @@
 import Login from "~/components/auth/Login";
-import { getSpotifyServerSession } from "~/util/spotifyauth";
+import { getSpotifyServerSession } from "~/util/auth/spotifyauth";
 import { redirect } from "next/navigation";
 
 export default async function LoginPage() {

@@ -1,4 +1,4 @@
-import { getSpotifyAuthRouteHandler } from "~/util/spotifyauth";
+import { getSpotifyAuthRouteHandler } from "~/util/auth/spotifyauth";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const handler = getSpotifyAuthRouteHandler();

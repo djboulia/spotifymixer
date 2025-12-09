@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { getSpotifyServerSession } from "~/util/spotifyauth";
+import { getSpotifyServerSession } from "~/util/auth/spotifyauth";
 import RadioSync from "~/components/RadioSync";
 
 export default async function RadioSyncPage() {

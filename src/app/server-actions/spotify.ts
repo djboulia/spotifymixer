@@ -1,7 +1,7 @@
 "use server";
 
 import SpotifyWebApi from "spotify-web-api-node";
-import { getSpotifyServerSession } from "~/util/spotifyauth";
+import { getSpotifyServerSession } from "~/util/auth/spotifyauth";
 import { PlayList } from "~/util/playlist";
 import type { Playlist } from "~/models/playlist";
 import { ShuffleState } from "~/util/shufflestate";

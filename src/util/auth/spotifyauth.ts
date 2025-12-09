@@ -81,8 +81,8 @@ const spotifyAuthOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      console.log("Session callback - token: ", token);
-      // Send properties to the client, like an access_token from a provider
+      // console.log("Session callback - token: ", token);
+      // Send back access token, refresh token and expiry time to the client
       session.accessToken = token.accessToken as string;
       session.refreshToken = token.refreshToken as string;
       session.expiresAt = token.expiresAt as number;
