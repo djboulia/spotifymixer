@@ -178,29 +178,23 @@ export class PlayList {
   private async getPlaylistWithRetries(playListId: string) {
     console.log("getPlaylistWithRetries for playlist id: " + playListId);
 
-    const data = await this.spotifyApi.getPlaylist(playListId).catch((err) => {
-      console.log("Something went wrong in getPlaylist!", err);
-      return undefined;
-    });
-
-    if (data) return data;
-
     // [07/17/2022] djb began receiving 502 errors semi randomly from this API call
-    //                  to avoid it, I put in a retry loop if the first call fails
+    //                  to avoid it, I put in a retry loop
     for (let i = 0; i < RETRY_NUMBER; i++) {
-      console.log("tracks retry number " + (i + 1));
-
-      // need to do retries, implement a delay between each retry
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-
       const data = await this.spotifyApi
         .getPlaylist(playListId)
         .catch((err) => {
-          console.log(`Retry ${i + 1} failed in getPlaylist!`, err);
+          console.log(`Attempt ${i + 1} failed in getPlaylist!`, err);
           return undefined;
         });
 
-      if (data) return data;
+      if (data) return data; // exit retry loop if successful
+
+      if (i < RETRY_NUMBER - 1) {
+        // need to do retries, implement a delay between each retry
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        console.log("tracks retry number " + (i + 1));
+      }
     }
 
     // all retries failed, throw error
@@ -262,31 +256,27 @@ export class PlayList {
       "reorderTracksInPlaylistWithRetries for playlist id: " + playListId,
     );
 
-    const data = await this.spotifyApi
-      .reorderTracksInPlaylist(playListId, from, to, options)
-      .catch((err) => {
-        console.log("Something went wrong in reorderTracksInPlaylist!", err);
-        return undefined;
-      });
-
-    if (data) return data;
-
     // [07/17/2022] djb began receiving 502 errors semi randomly from this API call
-    //                  to avoid it, I put in a retry loop if the first call fails
+    //                  to avoid it, I put in a retry loop
     for (let i = 0; i < RETRY_NUMBER; i++) {
-      console.log("tracks retry number " + (i + 1));
-
-      // need to do retries, implement a delay between each retry
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-
       const data = await this.spotifyApi
         .reorderTracksInPlaylist(playListId, from, to, options)
         .catch((err) => {
-          console.log("Something went wrong in reorderTracksInPlaylist!", err);
+          console.log(
+            `Attempt ${i + 1} failed in reorderTracksInPlaylist!`,
+            err,
+          );
+
           return undefined;
         });
 
-      if (data) return data;
+      if (data) return data; // exit retry loop if successful
+
+      if (i < RETRY_NUMBER - 1) {
+        // retrying, implement a delay between each retry
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        console.log("tracks retry number " + (i + 1));
+      }
     }
 
     // all retries failed, throw error
