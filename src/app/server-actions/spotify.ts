@@ -43,37 +43,6 @@ export async function getOwnedPlayLists(): Promise<Playlist[]> {
   return list;
 }
 
-export async function shuffle(
-  playListId: string,
-): Promise<ShuffProgressStatus> {
-  const session = await getSpotifyServerSession();
-  if (!session?.accessToken) {
-    throw new Error("Unauthorized access");
-  }
-
-  const spotifyApi = new SpotifyWebApi();
-  spotifyApi.setAccessToken(session.accessToken);
-
-  const shuffleProgress = shuffleState.add(session.accessToken);
-
-  shuffleProgress.start();
-
-  // kick off a shuffle... this could take a while, so we
-  // return immediately and the caller can check the state
-  // via the /progress api
-  shuffleProgress.shufflePlayList(spotifyApi, playListId).then(
-    function () {
-      shuffleProgress.complete();
-    },
-    function (err) {
-      console.log("Error: ", err);
-      shuffleProgress.complete();
-    },
-  );
-
-  return shuffleProgress.status();
-}
-
 export async function shuffleProgress(): Promise<ShuffProgressStatus> {
   const session = await getSpotifyServerSession();
   if (!session?.accessToken) {
@@ -115,7 +84,7 @@ async function spotifyShuffleItems(
   shuffleProgress.complete();
 }
 
-export async function shuffleMultiple(
+export async function shufflePlaylists(
   playListIds: string[],
 ): Promise<ShuffProgressStatus> {
   const session = await getSpotifyServerSession();

@@ -23,7 +23,6 @@ export function useProgressIndicator() {
 
   const startProgressTimer = function () {
     setTimeout(() => {
-      console.log("In Timeout");
       void checkProgress();
     }, POLL_INTERVAL_MS);
   };
@@ -67,27 +66,8 @@ export function useProgressIndicator() {
     }
   };
 
-  const shuffleSingle = function (playListId: string) {
-    console.log("id :" + playListId);
-
-    void Spotify.shuffle(playListId);
-
-    setInProgress(true);
-    setPercentComplete(0);
-    setPlayListDetails({ name: "Play List", img: "" });
-    setMultipleStatus(undefined);
-    setCategories([]);
-
-    startProgressTimer();
-  };
-
   const shuffle = function (playlistIds: string[]) {
-    if (playlistIds.length === 1 && playlistIds[0]) {
-      shuffleSingle(playlistIds[0]);
-      return;
-    }
-
-    void Spotify.shuffleMultiple(playlistIds);
+    void Spotify.shufflePlaylists(playlistIds);
 
     setInProgress(true);
     setPercentComplete(0);
