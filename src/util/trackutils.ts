@@ -37,6 +37,21 @@ export function shuffle(
   return tracks;
 }
 
+export function printTrack(
+  title: string,
+  track: SpotifyApi.PlaylistTrackObject | undefined,
+) {
+  if (track) {
+    const artists = track.track?.artists;
+    const name = track.track?.name;
+    const id = track.track?.id;
+
+    console.log(`${title} ${name} [${artists?.[0]?.name}], id = ${id}`);
+  } else {
+    console.log(title + " undefined!");
+  }
+}
+
 export function printTracks(
   tracks: SpotifyApi.PlaylistTrackObject[] | undefined,
 ) {
@@ -48,17 +63,7 @@ export function printTracks(
   for (let i = 0; i < tracks.length; i++) {
     const track = tracks[i];
 
-    if (track) {
-      const artists = track.track?.artists;
-      const name = track.track?.name;
-      const id = track.track?.id;
-
-      console.log(
-        "Track: " + i + " " + name + " [" + artists?.[0]?.name + "], id =" + id,
-      );
-    } else {
-      console.log("Track: " + i + " undefined!");
-    }
+    printTrack(`Track: ${i}`, track);
   }
 }
 

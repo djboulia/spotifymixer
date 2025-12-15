@@ -1,12 +1,11 @@
 /**
- * Normalize the track title by removing extraneous information,
- * such as (Remastered 2020), [Remastered], - Remastered, (feat. Artist), etc.
- * and converting to lowercase.
+ * Take off extraneous information from the track title for display purposes.
+ * Items in parentheses, brackets, or after hyphens are removed.
  *
- * @param {string} title - the original track title
- * @returns {string} - the normalized track title
+ * @param title
+ * @returns title without extraneous information
  */
-export const normalizeTitle = (title: string) => {
+export const normalizeDisplayTitle = (title: string) => {
   let newTitle = title;
 
   // regex to get the contents of the last pair of parentheses in the track name
@@ -32,6 +31,21 @@ export const normalizeTitle = (title: string) => {
   // remove apostrophes and commas, single quotes, and double quotes
   newTitle = newTitle.replace(/[’'",]/g, "").trim();
 
+  return newTitle;
+};
+
+/**
+ * Normalize the track title by removing extraneous information,
+ * such as (Remastered 2020), [Remastered], - Remastered, (feat. Artist), etc.
+ * and converting to lowercase.
+ *
+ * @param {string} title - the original track title
+ * @returns {string} - the normalized track title
+ */
+export const normalizeTitle = (title: string) => {
+  // remove apostrophes and commas, single quotes, and double quotes
+  const newTitle = normalizeDisplayTitle(title);
+
   return newTitle.toLowerCase();
 };
 
@@ -40,4 +54,18 @@ export const sameTitle = (title1: string, title2: string) => {
   const normalizedTitle2 = normalizeTitle(title2);
 
   return normalizedTitle1 === normalizedTitle2;
+};
+
+export const sameTitleInTracks = (
+  track1: SpotifyApi.PlaylistTrackObject | undefined,
+  track2: SpotifyApi.PlaylistTrackObject | undefined,
+) => {
+  if (!track1 || !track2) {
+    return false;
+  }
+
+  const title1 = track1.track?.name ?? "";
+  const title2 = track2.track?.name ?? "";
+
+  return sameTitle(title1, title2);
 };

@@ -1,8 +1,14 @@
 import { PlayList } from "./playlist";
 import * as TrackUtils from "./trackutils";
 import { logger } from "./logger";
-import { normalizeTitle } from "./title";
+import {
+  normalizeDisplayTitle,
+  normalizeTitle,
+  sameTitleInTracks,
+} from "./title";
 import type SpotifyWebApi from "spotify-web-api-node";
+import { sameArtistInTracks } from "./artist";
+import { printTrack } from "./trackutils";
 
 type MixerCategory = {
   type: string;
@@ -99,10 +105,7 @@ const getCategoriesTrackCount = function (
 const sortByCategories = async function (
   tracks: SpotifyApi.PlaylistTrackObject[],
 ) {
-  const categories: Record<
-    string,
-    { type: string; category: string; tracks: SpotifyApi.PlaylistTrackObject[] }
-  > = {};
+  const categories: Record<string, MixerCategory> = {};
   const titles: Record<string, SpotifyApi.PlaylistTrackObject[]> = {};
   const artists: SpotifyApi.PlaylistTrackObject[] = [];
 
@@ -129,7 +132,7 @@ const sortByCategories = async function (
           titleList.length +
           " versions",
       );
-      const name = titleList[0]?.track?.name ?? ""; // get non normalized name for display
+      const name = normalizeDisplayTitle(titleList[0]?.track?.name ?? "");
       categories[title] = {
         type: "title",
         category: name,
@@ -185,19 +188,12 @@ const sortByCategories = async function (
   const count = getCategoriesTrackCount(categories);
   if (count !== tracks.length) {
     logger.error(
-      "Error: track count mismatch!  Expected " +
-        tracks.length +
-        " but got " +
-        count,
+      `Error: track count mismatch!  Expected ${tracks.length} but got ${count}`,
     );
     throw new Error("Track count mismatch!");
   }
   logger.info(
-    "Categorized " +
-      count +
-      " tracks into " +
-      Object.keys(categories).length +
-      " categories",
+    `Categorized ${count} tracks into ${Object.keys(categories).length} categories`,
   );
 
   const sortedCategories = sortStats(categories);
@@ -224,6 +220,7 @@ const sortByCategories = async function (
  * @param {Number} frameSize size of frame to search
  * @param {Object} track track to insert
  * @param {Number} rando random seed to start to lay out this track
+ * @returns {Number} index where the track was placed
  */
 const placeInFrame = function (
   list: SpotifyApi.PlaylistTrackObject[],
@@ -242,7 +239,7 @@ const placeInFrame = function (
   for (let i = rando; i >= start; i--) {
     if (!list[i]) {
       list[i] = track;
-      return list;
+      return i;
     }
   }
 
@@ -251,27 +248,32 @@ const placeInFrame = function (
   for (let i = start; i < start + frameSize; i++) {
     if (!list[i]) {
       list[i] = track;
-      return list;
+      return i;
     }
   }
 
   // if there are no spots left in frame, insert ourselves
   list.splice(rando, 0, track);
 
-  // now go look for an open spot to delete
+  // now go look for an open spot to delete somewhere else in the list
   for (let i = 0; i < list.length; i++) {
     if (!list[i]) {
       logger.debug(
-        "Inserting at " + rando + " and removing at " + i + " ",
+        `Inserting at ${rando} and removing at ${i} `,
         track?.track?.name,
       );
 
       list.splice(i, 1);
-      return list;
+
+      // return the track position of the newly inserted track. we adjust
+      // if the removed track was before the inserted track
+      return i < rando ? rando - 1 : rando;
     }
   }
 
-  return list;
+  // this should never happen, but just in case, remove the last track
+  logger.error("placeInFrame: No empty slot found in frame!");
+  return rando;
 };
 
 /**
@@ -318,6 +320,95 @@ const placeLowInFrame = function (
 };
 
 /**
+ * If the two tracks are by the same artist or have the same title,
+ * return true
+ *
+ * @param track1
+ * @param track2
+ * @returns {boolean} true if similar, false otherwise
+ */
+const isSimilarTrack = function (
+  track1: SpotifyApi.PlaylistTrackObject | undefined,
+  track2: SpotifyApi.PlaylistTrackObject | undefined,
+) {
+  return (
+    sameArtistInTracks(track1, track2) || sameTitleInTracks(track1, track2)
+  );
+};
+
+/**
+ * Check the given index to see if the positions before and after it
+ * are the same artist or same title; if so, return false else true
+ *
+ * @param list
+ * @param index
+ * @param track
+ * @returns {boolean} true if valid placement, false if not
+ */
+const isValidPlacement = function (
+  list: SpotifyApi.PlaylistTrackObject[],
+  index: number,
+  track: SpotifyApi.PlaylistTrackObject,
+) {
+  if (!track) {
+    throw new Error("isValidPlacement called with invalid track!");
+  }
+
+  // check previous track if it exists
+  if (index > 0) {
+    if (isSimilarTrack(track, list[index - 1])) {
+      return false;
+    }
+  }
+
+  // check next track if it exists
+  if (index < list.length - 1) {
+    if (isSimilarTrack(track, list[index + 1])) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const swapInFrame = function (
+  list: SpotifyApi.PlaylistTrackObject[],
+  start: number,
+  frameSize: number,
+  index: number,
+) {
+  // walk the frame looking for a spot where this track is not between same artist/title
+  for (let i = start; i < start + frameSize; i++) {
+    if (i === index) {
+      continue;
+    }
+
+    const track = list[index];
+    if (!track) {
+      throw new Error("swapInFrame called with invalid track!");
+    }
+
+    if (isValidPlacement(list, i, track)) {
+      // swap the two tracks
+      const temp = list[i];
+      list[i] = list[index]!;
+      list[index] = temp!;
+
+      logger.info(
+        `Swapped track ${list[index]?.track?.name} at index ${index} with track ${list[i]?.track?.name} at index ${i}`,
+      );
+      return;
+    }
+  }
+
+  // if we get here, we walked the whole frame and couldn't find a suitable spot.
+  // this can happen in playlists which consist of many
+  // tracks by the same aritst or the same song appearing heavily in a playlist
+  // if we can't place the track in a better spot, we leave it where it is
+  logger.info("swapInFrame: No empty slot found to swap!");
+};
+
+/**
  * This returns the "to be" playlist order as an array.
  *
  * @param {Array} sortedStats
@@ -348,11 +439,26 @@ const buildPlaylist = function (sortedStats: MixerCategory[]) {
     // distribute the tracks for this artist throughout the frame
     for (const track of stat.tracks) {
       const currentFrameSize = remainder > 0 ? frameSize + 1 : frameSize;
+      logger.info(
+        `Category ${stat.category}: total tracks ${total}, stat tracks ${stat.tracks.length} in frame starting at ${frameStart} with size ${currentFrameSize}`,
+      );
 
-      if (low) {
-        placeLowInFrame(mixList, frameStart, currentFrameSize, track);
-      } else {
-        placeHighInFrame(mixList, frameStart, currentFrameSize, track);
+      const trackIndex = low
+        ? placeLowInFrame(mixList, frameStart, currentFrameSize, track)
+        : placeHighInFrame(mixList, frameStart, currentFrameSize, track);
+
+      // now check to make sure we didn't put this track next to another
+      // of the same artist or title. if so, try to move it
+      if (!isValidPlacement(mixList, trackIndex, track)) {
+        logger.info(
+          `Track ${track?.track?.name} at index ${trackIndex} is too close to same artist/title, relocating...`,
+        );
+
+        printTrack("\t[Prior track] ", mixList[trackIndex - 1]);
+        printTrack("\t[Current track] ", mixList[trackIndex]);
+        printTrack("\t[Next track] ", mixList[trackIndex + 1]);
+
+        swapInFrame(mixList, frameStart, currentFrameSize, trackIndex);
       }
 
       frameStart += currentFrameSize;
@@ -371,6 +477,8 @@ const buildPlaylist = function (sortedStats: MixerCategory[]) {
  * spaced out so that you don't hear the same artist back to back.  This
  * repeats with other artists in decreasing frequency.  Finally one hit wonders
  * are combined, randomized and used to fill in any gaps in the play list.
+ *
+ * [djb 11/20/2025] - added duplicate titled tracks to the shuffle categories
  *
  * @param {Object} spotifyApi a configured SpotifyApi with a valid access token
  */
@@ -393,7 +501,7 @@ export class Mixer {
   }
 
   /**
-   * catalog the tracks by artist so we can figure out how to lay out
+   * catalog the tracks by same artist and same title so we can figure out how to lay out
    * a properly mixed playlist
    *
    * @param {Array} tracks array of tracks objects

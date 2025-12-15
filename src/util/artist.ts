@@ -62,3 +62,17 @@ export const sameArtist = (artist1: string, artist2: string) => {
 export const sameArtistInList = (artistList: string[], artist: string) => {
   return artistList.some((a) => sameArtist(a, artist));
 };
+
+export const sameArtistInTracks = (
+  track1: SpotifyApi.PlaylistTrackObject | undefined,
+  track2: SpotifyApi.PlaylistTrackObject | undefined,
+) => {
+  if (!track1 || !track2) {
+    return false;
+  }
+
+  const artist1 = track1.track?.artists?.[0]?.name ?? "";
+  const artist2 = track2.track?.artists?.[0]?.name ?? "";
+
+  return sameArtist(artist1, artist2);
+};
