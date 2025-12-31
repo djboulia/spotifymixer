@@ -36,10 +36,12 @@ const radioStations: RadioStationResults[] = [
     results: [],
   },
   {
-    name: "Mix 99.5 Holiday",
+    /* switch to holiday playlist during christmas season */
+    name: "Mix 99.5",
+    // name: "Mix 99.5 Holiday",
     stationId: "wmag-fm",
-    playListId: "5sbYeTzDkrwSmTMBCC16AC", // Christmas 99.5 (Nov-Dec 2023)
-    //  playListId: '5ugQ31xoBaNmMIRFyyU5AQ', // Mix 99.5 (Non-Seasonal)
+    playListId: "5ugQ31xoBaNmMIRFyyU5AQ", // Mix 99.5 (Non-Seasonal)
+    // playListId: "5sbYeTzDkrwSmTMBCC16AC", // Christmas 99.5 (Nov-Dec 2023)
     results: [],
   },
   {
@@ -60,24 +62,26 @@ const radioStations: RadioStationResults[] = [
     playListId: "7nyvjPt084p4cY7BPucDiF",
     results: [],
   },
-  // { /* turn off durring christmas season */
-  //   name: "U100.9 (60s and 70s)",
-  //   stationId: "wiba-hd2",
-  //   playListId: "6ZPhEMCM684QeeHb86BXr1",
-  //   results: [],
-  // },
+  {
+    /* comment out during christmas season */
+    name: "U100.9 (60s and 70s)",
+    stationId: "wiba-hd2",
+    playListId: "6ZPhEMCM684QeeHb86BXr1",
+    results: [],
+  },
   {
     name: "BIG 95.7 (80s and 90s)",
     stationId: "writ-fm",
     playListId: "5lcRbHcmQBqskUgv0OxFW4",
     results: [],
   },
-  // { /* turn off during christmas season */
-  //  name: "Majic 105.7 (70s and 80s)",
-  //   stationId: "wmji-fm",
-  //   playListId: "3HV1ocKu6cYKaOEOn8kihh",
-  // results: [],
-  // }
+  {
+    /* comment out during christmas season */
+    name: "Majic 105.7 (70s and 80s)",
+    stationId: "wmji-fm",
+    playListId: "3HV1ocKu6cYKaOEOn8kihh",
+    results: [],
+  },
 ];
 
 export default function RadioSync() {
