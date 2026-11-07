@@ -37,11 +37,11 @@ const radioStations: RadioStationResults[] = [
   },
   {
     /* switch to holiday playlist during christmas season */
-    name: "Mix 99.5",
-    // name: "Mix 99.5 Holiday",
+    // name: "Mix 99.5",
+    name: "Mix 99.5 Holiday",
     stationId: "wmag-fm",
-    playListId: "5ugQ31xoBaNmMIRFyyU5AQ", // Mix 99.5 (Non-Seasonal)
-    // playListId: "5sbYeTzDkrwSmTMBCC16AC", // Christmas 99.5 (Nov-Dec 2023)
+    // playListId: "5ugQ31xoBaNmMIRFyyU5AQ", // Mix 99.5 (Non-Seasonal)
+    playListId: "5sbYeTzDkrwSmTMBCC16AC", // Christmas 99.5 (Nov-Dec 2023)
     results: [],
   },
   {
